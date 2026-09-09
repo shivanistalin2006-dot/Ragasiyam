@@ -1,0 +1,129 @@
+/* ==========================================================================
+   PUZZLE OF THE DAY — Responsive Styles & Mobile Adaptations
+   ========================================================================== */
+
+/* Medium Devices (Tablets & Mobile Landscape - max 992px) */
+@media (max-width: 992px) {
+  .hero-section {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 1rem 0;
+  }
+
+  .hero-content {
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero-title {
+    font-size: 3.2rem;
+  }
+
+  .daily-preview-card {
+    margin: 0 auto;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .profile-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .profile-name-row {
+    justify-content: center;
+  }
+}
+
+/* Small Devices (Mobiles - max 768px) */
+@media (max-width: 768px) {
+  .site-header {
+    padding: 1rem;
+  }
+
+  /* Hide Desktop Top Nav, Show Mobile Bottom Nav */
+  .nav-links {
+    display: none;
+  }
+
+  .mobile-bottom-nav {
+    display: block;
+  }
+
+  .page-container {
+    padding: 1rem 1rem 5.5rem 1rem;
+  }
+
+  .page-title {
+    font-size: 2.2rem;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .retro-sun {
+    width: 100px;
+    height: 100px;
+    top: -20px;
+    right: -10px;
+  }
+
+  .puzzle-main-card {
+    padding: 1.5rem;
+  }
+
+  .game-header-bar {
+    padding: 0.75rem 1rem;
+  }
+
+  .timer-box {
+    font-size: 1.2rem;
+  }
+
+  .options-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .input-group {
+    flex-direction: column;
+  }
+
+  .archive-matrix {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.8rem;
+  }
+
+  .achievements-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Extra Small Devices (Smartphones - max 480px) */
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-stats-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .btn-lg {
+    padding: 0.9rem 1.5rem;
+    font-size: 1.1rem;
+    width: 100%;
+  }
+
+  .modal-content {
+    padding: 1.5rem;
+  }
+
+  .victory-banner {
+    font-size: 2.1rem;
+  }
+}

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statistics & Profile — Puzzle of the Day</title>
+
+  <!-- Google Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Luckiest+Guy&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-header">
+    <a href="../index.html" class="brand-logo">
+      <span class="brand-icon">🧩</span>
+      <div>
+        <div style="line-height: 1;">PUZZLE</div>
+        <div style="font-size: 0.75rem; font-family: var(--font-heading); color: var(--warm-cream); letter-spacing: 0.1em;">OF THE DAY</div>
+      </div>
+    </a>
+
+    <nav class="main-nav">
+      <ul class="nav-links">
+        <li><a href="../index.html" class="nav-link">🧩 Home</a></li>
+        <li><a href="puzzle.html" class="nav-link">🎯 Daily Puzzle</a></li>
+        <li><a href="archive.html" class="nav-link">📅 Archive</a></li>
+        <li><a href="stats.html" class="nav-link active">📊 Stats</a></li>
+        <li><a href="achievements.html" class="nav-link">🏆 Badges</a></li>
+      </ul>
+
+      <div class="header-controls">
+        <button id="btn-sound-toggle" class="btn-icon" title="Toggle Sound">🔊</button>
+        <button id="btn-dark-toggle" class="btn-icon" title="Toggle Sunset Mode">🌅</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Stats Main Container -->
+  <main class="page-container">
+    <div class="page-title-banner">
+      <h1 class="page-title">PLAYER STATISTICS</h1>
+      <p class="page-subtitle">Track your brain mastery, streaks, level progression, and puzzle personality.</p>
+    </div>
+
+    <!-- Player Profile Header Card -->
+    <div class="profile-card">
+      <div class="profile-avatar-box">
+        🧩
+      </div>
+      <div class="profile-details">
+        <div class="profile-name-row">
+          <div id="player-name-val" class="player-name">Puzzle Challenger</div>
+          <div id="player-personality-val" class="personality-tag">🕵️ THE DETECTIVE</div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-family: var(--font-heading); font-size: 0.9rem; font-weight: 700;">
+          <span id="player-level-val" style="color: var(--golden-yellow);">Level 1 — Curious Mind</span>
+          <span style="color: var(--warm-cream);">XP PROGRESS</span>
+        </div>
+
+        <!-- XP Progress Bar -->
+        <div class="xp-bar-outer">
+          <div id="xp-bar-fill" class="xp-bar-inner" style="width: 25%;"></div>
+          <div id="xp-bar-text" class="xp-text">75 / 300 XP</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4x Metrics Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card-icon">🎯</div>
+        <div id="stat-total-solved" class="stat-card-val">0</div>
+        <div class="stat-card-label">Puzzles Solved</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-icon">🏆</div>
+        <div id="stat-total-score" class="stat-card-val">0</div>
+        <div class="stat-card-label">Total Score</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-icon">🔥</div>
+        <div id="stat-current-streak" class="stat-card-val">0</div>
+        <div class="stat-card-label">Current Streak</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-icon">👑</div>
+        <div id="stat-longest-streak" class="stat-card-val">0</div>
+        <div class="stat-card-label">Longest Streak</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-icon">⏱️</div>
+        <div id="stat-avg-time" class="stat-card-val">0s</div>
+        <div class="stat-card-label">Avg Solve Time</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-icon">💡</div>
+        <div id="stat-hints-used" class="stat-card-val">0</div>
+        <div class="stat-card-label">Hints Used</div>
+      </div>
+    </div>
+
+    <!-- Category Mastery Distribution Chart -->
+    <div class="chart-container">
+      <h3 class="font-heading" style="font-size: 1.4rem; color: var(--dark-brown); margin-bottom: 1.2rem;">
+        📊 CATEGORY MASTERY DISTRIBUTION
+      </h3>
+      <div id="category-chart-container">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-bottom-nav">
+    <ul class="nav-list">
+      <li class="nav-item"><a href="../index.html"><span class="nav-icon">🧩</span>Home</a></li>
+      <li class="nav-item"><a href="puzzle.html"><span class="nav-icon">🎯</span>Puzzle</a></li>
+      <li class="nav-item"><a href="archive.html"><span class="nav-icon">📅</span>Archive</a></li>
+      <li class="nav-item"><a href="stats.html" class="active"><span class="nav-icon">📊</span>Stats</a></li>
+      <li class="nav-item"><a href="achievements.html"><span class="nav-icon">🏆</span>Badges</a></li>
+    </ul>
+  </nav>
+
+  <!-- JavaScript Stack -->
+  <script src="../js/puzzles.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/timer.js"></script>
+  <script src="../js/scoring.js"></script>
+  <script src="../js/hints.js"></script>
+  <script src="../js/streak.js"></script>
+  <script src="../js/achievements.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/app.js"></script>
+</body>
+</html>

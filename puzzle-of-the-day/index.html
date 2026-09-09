@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puzzle of the Day — Retro Sunset Brain Arcade</title>
+
+  <!-- Google Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Luckiest+Guy&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-header">
+    <a href="index.html" class="brand-logo">
+      <span class="brand-icon">🧩</span>
+      <div>
+        <div style="line-height: 1;">PUZZLE</div>
+        <div style="font-size: 0.75rem; font-family: var(--font-heading); color: var(--warm-cream); letter-spacing: 0.1em;">OF THE DAY</div>
+      </div>
+    </a>
+
+    <nav class="main-nav">
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link active">🧩 Home</a></li>
+        <li><a href="pages/puzzle.html" class="nav-link">🎯 Daily Puzzle</a></li>
+        <li><a href="pages/archive.html" class="nav-link">📅 Archive</a></li>
+        <li><a href="pages/stats.html" class="nav-link">📊 Stats</a></li>
+        <li><a href="pages/achievements.html" class="nav-link">🏆 Badges</a></li>
+      </ul>
+
+      <div class="header-controls">
+        <button id="btn-sound-toggle" class="btn-icon" title="Toggle Sound">🔊</button>
+        <button id="btn-dark-toggle" class="btn-icon" title="Toggle Sunset Mode">🌅</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Hero Section -->
+  <main class="page-container">
+    <section class="hero-section">
+      
+      <!-- Hero Left Text Content -->
+      <div class="hero-content">
+        <div class="hero-badge-tag">
+          <span>🔥 ACTIVE STREAK:</span>
+          <span id="hero-streak">0 DAYS</span>
+        </div>
+
+        <h1 class="hero-title">
+          GIVE YOUR BRAIN
+          <span>SOMETHING TO CHASE.</span>
+        </h1>
+
+        <p class="hero-tagline">
+          One featured retro puzzle every day. Test your logic, race the clock, rack up streaks, and unlock arcade glory.
+        </p>
+
+        <button id="hero-cta-btn" class="btn btn-primary btn-lg glow-effect">
+          CRACK TODAY'S PUZZLE →
+        </button>
+
+        <!-- Weekly Streak Strip -->
+        <div style="margin-top: 1rem; width: 100%;">
+          <div style="font-family: var(--font-heading); font-size: 0.85rem; color: var(--warm-cream); font-weight: 700; margin-bottom: 0.5rem; text-transform: uppercase;">
+            THIS WEEK'S PROGRESS:
+          </div>
+          <div id="hero-streak-strip" style="display: flex; gap: 0.8rem; background: rgba(42,23,56,0.5); padding: 0.8rem; border-radius: var(--radius-md); border: 2px solid var(--dark-brown);">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Right Daily Puzzle Card Preview -->
+      <div class="daily-preview-card">
+        <div class="retro-sun"></div>
+
+        <div class="retro-card-header">
+          <span id="hero-category" class="category-badge cat-logic">🧠 Logic</span>
+          <span id="hero-diff" class="diff-badge diff-easy">Easy</span>
+        </div>
+
+        <div style="font-family: var(--font-heading); font-size: 0.85rem; text-transform: uppercase; color: #777; font-weight: 700;">
+          TODAY'S FEATURED CHALLENGE
+        </div>
+
+        <h2 id="hero-day-num" class="font-display" style="font-size: 2.4rem; color: var(--dark-brown); margin: 0.2rem 0 1rem 0;">
+          DAY #1
+        </h2>
+
+        <p style="font-size: 1.05rem; color: #444; margin-bottom: 1.5rem; line-height: 1.5;">
+          Ready to put your mind to the test? Click below to enter the retro puzzle arena and crack today's code!
+        </p>
+
+        <div class="hero-stats-row">
+          <div class="hero-stat-pill">
+            <div class="hero-stat-label">BASE SCORE</div>
+            <div class="hero-stat-value">1,000</div>
+          </div>
+          <div class="hero-stat-pill">
+            <div class="hero-stat-label">HINTS</div>
+            <div class="hero-stat-value">3 AVAILABLE</div>
+          </div>
+        </div>
+
+        <a href="pages/puzzle.html" class="btn btn-secondary" style="width: 100%;">
+          ENTER ARENA 🎯
+        </a>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-bottom-nav">
+    <ul class="nav-list">
+      <li class="nav-item"><a href="index.html" class="active"><span class="nav-icon">🧩</span>Home</a></li>
+      <li class="nav-item"><a href="pages/puzzle.html"><span class="nav-icon">🎯</span>Puzzle</a></li>
+      <li class="nav-item"><a href="pages/archive.html"><span class="nav-icon">📅</span>Archive</a></li>
+      <li class="nav-item"><a href="pages/stats.html"><span class="nav-icon">📊</span>Stats</a></li>
+      <li class="nav-item"><a href="pages/achievements.html"><span class="nav-icon">🏆</span>Badges</a></li>
+    </ul>
+  </nav>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <p>Puzzle of the Day &copy; 2026 — Premium Retro Sunset Brain Arcade</p>
+  </footer>
+
+  <!-- JavaScript Stack -->
+  <script src="js/puzzles.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/hints.js"></script>
+  <script src="js/streak.js"></script>
+  <script src="js/achievements.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
