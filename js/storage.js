@@ -18,7 +18,7 @@ const DEFAULT_STATE = {
   settings: {
     soundEnabled: true,
     reducedMotion: false,
-    darkMode: false
+    pinkMode: false
   }
 };
 
@@ -135,14 +135,14 @@ class StorageManager {
     return this.state.settings.soundEnabled;
   }
 
-  toggleDarkMode(forceValue) {
+  togglePinkMode(forceValue) {
     if (forceValue !== undefined) {
-      this.state.settings.darkMode = forceValue;
+      this.state.settings.pinkMode = forceValue;
     } else {
-      this.state.settings.darkMode = !this.state.settings.darkMode;
+      this.state.settings.pinkMode = !this.state.settings.pinkMode;
     }
     this.saveState();
-    return this.state.settings.darkMode;
+    return this.state.settings.pinkMode;
   }
 
   resetProgress() {

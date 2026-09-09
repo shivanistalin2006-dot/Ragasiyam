@@ -32,10 +32,10 @@ const AppRouter = {
 
   applySettings() {
     const settings = potdStorage.getState().settings;
-    if (settings.darkMode) {
-      document.body.classList.add('dark-mode');
+    if (settings.pinkMode) {
+      document.body.classList.add('pink-mode');
     } else {
-      document.body.classList.remove('dark-mode');
+      document.body.classList.remove('pink-mode');
     }
   },
 
@@ -50,13 +50,14 @@ const AppRouter = {
       soundBtn.textContent = potdStorage.getState().settings.soundEnabled ? '🔊' : '🔇';
     }
 
-    const darkBtn = document.getElementById('btn-dark-toggle');
-    if (darkBtn) {
-      darkBtn.onclick = () => {
-        const isDark = potdStorage.toggleDarkMode();
+    const pinkBtn = document.getElementById('btn-dark-toggle') || document.getElementById('btn-pink-toggle');
+    if (pinkBtn) {
+      pinkBtn.onclick = () => {
+        const isPink = potdStorage.togglePinkMode();
         this.applySettings();
         potdSound.playClick();
       };
+      pinkBtn.title = "Toggle Pink Sunset Theme";
     }
   },
 

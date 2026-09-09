@@ -46,17 +46,17 @@
   --transition-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Darker Sunset Mode Override */
-body.dark-mode {
-  --deep-plum: #1A0D24;
-  --sunset-purple: #3D2242;
-  --dusty-pink: #9B4C57;
-  --coral: #C55E47;
-  --sunset-orange: #C9773D;
-  --golden-yellow: #D9A546;
-  --warm-cream: #EADCB9;
-  --cream-card: #2B1933;
-  --dark-brown: #1E1216;
+/* Pink Sunset Arcade Theme Mode */
+body.pink-mode {
+  --deep-plum: #521638;
+  --sunset-purple: #852654;
+  --dusty-pink: #D6467A;
+  --coral: #FF6599;
+  --sunset-orange: #FF85B2;
+  --golden-yellow: #FFB3D1;
+  --warm-cream: #FFF0F5;
+  --cream-card: #FFF4F8;
+  --dark-brown: #380820;
 }
 
 /* ==========================================================================
