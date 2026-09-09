@@ -1259,3 +1259,99 @@ a {
   border-top: 2px solid var(--sunset-purple);
   margin-top: 3rem;
 }
+
+/* ==========================================================================
+   Retro Authentication Modal & User Badge
+   ========================================================================== */
+
+.user-header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--sunset-purple);
+  color: var(--golden-yellow);
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--dark-brown);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-retro-sm);
+  transition: all var(--transition-bounce);
+}
+
+.user-header-badge:hover {
+  transform: translateY(-2px);
+  background: var(--coral);
+  color: var(--warm-cream);
+}
+
+.auth-tabs {
+  display: flex;
+  background: rgba(89, 52, 95, 0.2);
+  border: 2px solid var(--dark-brown);
+  border-radius: var(--radius-pill);
+  padding: 0.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.auth-tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.6rem;
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--dark-brown);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.auth-tab-btn.active {
+  background: var(--golden-yellow);
+  box-shadow: 0 3px 0 var(--dark-brown);
+}
+
+.avatar-selector-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  margin: 1rem 0;
+}
+
+.avatar-opt-btn {
+  background: var(--warm-cream);
+  border: 2px solid var(--dark-brown);
+  font-size: 1.5rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-bounce);
+}
+
+.avatar-opt-btn.selected {
+  background: var(--golden-yellow);
+  transform: scale(1.15);
+  box-shadow: 0 0 10px rgba(246, 197, 107, 0.6);
+  border-color: var(--sunset-purple);
+}
+
+.auth-error-banner {
+  background: #FCE1E4;
+  color: #8F2D38;
+  border: 2px solid var(--dark-brown);
+  padding: 0.6rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  display: none;
+}
+

@@ -7,9 +7,17 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const AppRouter = {
-  init() {
+  async init() {
+    if (typeof potdDB !== 'undefined') {
+      await potdDB.init();
+    }
+    if (typeof potdAuth !== 'undefined' && potdAuth.isAuthenticated()) {
+      potdStorage.loadUserStateFromDB(potdAuth.getCurrentUser());
+    }
+
     this.applySettings();
     this.setupGlobalEvents();
+    this.setupAuthModalEvents();
     this.updateHeaderStats();
     UIUtils.spawnFloatingPieces();
 
@@ -58,6 +66,102 @@ const AppRouter = {
         potdSound.playClick();
       };
       pinkBtn.title = "Toggle Pink Sunset Theme";
+    }
+  },
+
+  setupAuthModalEvents() {
+    const authBtn = document.getElementById('btn-auth-trigger');
+    const authModal = document.getElementById('auth-modal');
+    const closeModalBtn = document.getElementById('auth-modal-close');
+    const authForm = document.getElementById('auth-form');
+    const tabLogin = document.getElementById('tab-btn-login');
+    const tabSignup = document.getElementById('tab-btn-signup');
+    const emailGroup = document.getElementById('auth-email-group');
+    const avatarGroup = document.getElementById('auth-avatar-group');
+    const authSubmitBtn = document.getElementById('auth-submit-btn');
+    const errorBanner = document.getElementById('auth-error-banner');
+
+    let activeTab = 'login';
+    let selectedAvatar = '🧩';
+
+    if (authBtn) {
+      if (typeof potdAuth !== 'undefined' && potdAuth.isAuthenticated()) {
+        const user = potdAuth.getCurrentUser();
+        authBtn.innerHTML = `<span>${user.avatar || '🧩'}</span> ${user.username}`;
+        authBtn.onclick = () => {
+          if (confirm(`Logged in as ${user.username}. Do you want to log out?`)) {
+            potdAuth.logout();
+          }
+        };
+      } else {
+        authBtn.innerHTML = `<span>🔑</span> LOGIN / SIGN UP`;
+        authBtn.onclick = () => {
+          if (authModal) authModal.classList.add('active');
+        };
+      }
+    }
+
+    if (closeModalBtn && authModal) {
+      closeModalBtn.onclick = () => authModal.classList.remove('active');
+    }
+
+    // Avatar selector clicks
+    document.querySelectorAll('.avatar-opt-btn').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('.avatar-opt-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedAvatar = btn.getAttribute('data-avatar') || '🧩';
+      };
+    });
+
+    if (tabLogin && tabSignup) {
+      tabLogin.onclick = () => {
+        activeTab = 'login';
+        tabLogin.classList.add('active');
+        tabSignup.classList.remove('active');
+        if (emailGroup) emailGroup.style.display = 'none';
+        if (avatarGroup) avatarGroup.style.display = 'none';
+        if (authSubmitBtn) authSubmitBtn.textContent = 'LOG IN 🚀';
+        if (errorBanner) errorBanner.style.display = 'none';
+      };
+
+      tabSignup.onclick = () => {
+        activeTab = 'signup';
+        tabSignup.classList.add('active');
+        tabLogin.classList.remove('active');
+        if (emailGroup) emailGroup.style.display = 'block';
+        if (avatarGroup) avatarGroup.style.display = 'block';
+        if (authSubmitBtn) authSubmitBtn.textContent = 'CREATE ACCOUNT ✨';
+        if (errorBanner) errorBanner.style.display = 'none';
+      };
+    }
+
+    if (authForm) {
+      authForm.onsubmit = async (e) => {
+        e.preventDefault();
+        if (errorBanner) errorBanner.style.display = 'none';
+
+        const username = document.getElementById('auth-username-input')?.value;
+        const password = document.getElementById('auth-password-input')?.value;
+        const email = document.getElementById('auth-email-input')?.value;
+
+        try {
+          if (activeTab === 'login') {
+            await potdAuth.login(username, password);
+          } else {
+            await potdAuth.register(username, email, password, selectedAvatar);
+          }
+          potdSound.playAchievement();
+          if (authModal) authModal.classList.remove('active');
+          window.location.reload();
+        } catch (err) {
+          potdSound.playWrong();
+          if (errorBanner) {
+            errorBanner.textContent = err.message || 'Authentication failed.';
+            errorBanner.style.display = 'block';
+          }
+        }
+      };
     }
   },
 

@@ -10,6 +10,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Luckiest+Guy&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+  <!-- sql.js WebAssembly SQLite CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+
   <!-- Core CSS -->
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/animations.css">
@@ -37,6 +40,7 @@
       </ul>
 
       <div class="header-controls">
+        <button id="btn-auth-trigger" class="user-header-badge">🔑 LOGIN</button>
         <button id="btn-sound-toggle" class="btn-icon" title="Toggle Sound">🔊</button>
         <button id="btn-dark-toggle" class="btn-icon" title="Toggle Pink Theme">🌸</button>
       </div>
@@ -135,7 +139,60 @@
     </ul>
   </nav>
 
+  <!-- Retro Authentication Modal -->
+  <div id="auth-modal" class="modal-overlay">
+    <div class="modal-content animate-fade-in" style="max-width: 440px;">
+      <button id="auth-modal-close" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--dark-brown);">✖</button>
+      
+      <div style="font-size: 2.5rem; margin-bottom: 0.3rem;">🧩</div>
+      <h2 class="font-display" style="font-size: 2rem; color: var(--dark-brown); margin-bottom: 1rem;">ARCADE ACCOUNT</h2>
+
+      <!-- Auth Tab Switcher -->
+      <div class="auth-tabs">
+        <button id="tab-btn-login" class="auth-tab-btn active">LOG IN</button>
+        <button id="tab-btn-signup" class="auth-tab-btn">SIGN UP</button>
+      </div>
+
+      <div id="auth-error-banner" class="auth-error-banner"></div>
+
+      <!-- Auth Form -->
+      <form id="auth-form" style="display: flex; flex-direction: column; gap: 1rem; text-align: left;">
+        <div>
+          <label style="font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: var(--dark-brown);">USERNAME</label>
+          <input type="text" id="auth-username-input" class="retro-input" style="padding: 0.75rem 1rem; width: 100%; font-size: 1rem;" placeholder="e.g. BrainHunter" required />
+        </div>
+
+        <div id="auth-email-group" style="display: none;">
+          <label style="font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: var(--dark-brown);">EMAIL ADDRESS</label>
+          <input type="email" id="auth-email-input" class="retro-input" style="padding: 0.75rem 1rem; width: 100%; font-size: 1rem;" placeholder="player@arcade.com" />
+        </div>
+
+        <div>
+          <label style="font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: var(--dark-brown);">PASSWORD</label>
+          <input type="password" id="auth-password-input" class="retro-input" style="padding: 0.75rem 1rem; width: 100%; font-size: 1rem;" placeholder="••••••••" required />
+        </div>
+
+        <div id="auth-avatar-group" style="display: none; text-align: center;">
+          <label style="font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: var(--dark-brown);">CHOOSE AVATAR</label>
+          <div class="avatar-selector-row">
+            <button type="button" class="avatar-opt-btn selected" data-avatar="🧩">🧩</button>
+            <button type="button" class="avatar-opt-btn" data-avatar="🕵️">🕵️</button>
+            <button type="button" class="avatar-opt-btn" data-avatar="⚡">⚡</button>
+            <button type="button" class="avatar-opt-btn" data-avatar="🧠">🧠</button>
+            <button type="button" class="avatar-opt-btn" data-avatar="👑">👑</button>
+          </div>
+        </div>
+
+        <button type="submit" id="auth-submit-btn" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 0.5rem;">
+          LOG IN 🚀
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- JavaScript Stack -->
+  <script src="../js/db.js"></script>
+  <script src="../js/auth.js"></script>
   <script src="../js/puzzles.js"></script>
   <script src="../js/storage.js"></script>
   <script src="../js/timer.js"></script>

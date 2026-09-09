@@ -40,11 +40,47 @@ class StorageManager {
     return { ...DEFAULT_STATE };
   }
 
+  loadUserStateFromDB(userObj) {
+    if (!userObj) return;
+    this.state.playerName = userObj.username;
+    this.state.avatarIcon = userObj.avatar || '🧩';
+    
+    // Load solves and achievements from SQLite DB
+    if (typeof potdDB !== 'undefined' && potdDB.isReady) {
+      const dbUser = potdDB.getUserByUsername(userObj.username);
+      if (dbUser) {
+        this.state.level = dbUser.level || 1;
+        this.state.xp = dbUser.xp || 0;
+        this.state.totalScore = dbUser.total_score || 0;
+        this.state.currentStreak = dbUser.current_streak || 0;
+        this.state.longestStreak = dbUser.longest_streak || 0;
+        this.state.lastPlayedDate = dbUser.last_played_date || null;
+      }
+      this.state.completedDays = potdDB.getUserSolves(userObj.id) || {};
+      this.state.unlockedAchievements = potdDB.getUserAchievements(userObj.id) || [];
+    }
+  }
+
   saveState() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+
+      // Also sync to SQLite DB if user is logged in
+      if (typeof potdAuth !== 'undefined' && potdAuth.isAuthenticated()) {
+        const user = potdAuth.getCurrentUser();
+        if (user && typeof potdDB !== 'undefined' && potdDB.isReady) {
+          potdDB.updateUserStats(user.id, {
+            level: this.state.level,
+            xp: this.state.xp,
+            total_score: this.state.totalScore,
+            current_streak: this.state.currentStreak,
+            longest_streak: this.state.longestStreak,
+            last_played_date: this.state.lastPlayedDate
+          });
+        }
+      }
     } catch (e) {
-      console.error('Failed to save to LocalStorage:', e);
+      console.error('Failed to save state:', e);
     }
   }
 
@@ -81,6 +117,14 @@ class StorageManager {
 
     // Update Streak
     this.updateStreak(todayStr);
+
+    // Sync solve to SQLite DB
+    if (typeof potdAuth !== 'undefined' && potdAuth.isAuthenticated()) {
+      const user = potdAuth.getCurrentUser();
+      if (user && typeof potdDB !== 'undefined' && potdDB.isReady) {
+        potdDB.recordSolve(user.id, dayNum, scoreData.finalScore, timeSpent, hintsCount, isPerfect, todayStr);
+      }
+    }
 
     this.saveState();
   }
@@ -119,6 +163,14 @@ class StorageManager {
     if (!this.state.unlockedAchievements.includes(achievementId)) {
       this.state.unlockedAchievements.push(achievementId);
       this.addXP(50); // Achievement XP reward
+
+      if (typeof potdAuth !== 'undefined' && potdAuth.isAuthenticated()) {
+        const user = potdAuth.getCurrentUser();
+        if (user && typeof potdDB !== 'undefined' && potdDB.isReady) {
+          potdDB.unlockAchievement(user.id, achievementId);
+        }
+      }
+
       this.saveState();
       return true;
     }
