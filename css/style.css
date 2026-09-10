@@ -61,73 +61,65 @@ body.pink-mode {
 
 /* Midnight Ragasiyam Cosmic Theme Mode */
 body.midnight-mode {
-  --deep-plum: #0B0C10;
-  --sunset-purple: #1F2833;
+  --deep-plum: #08090C;
+  --sunset-purple: #1A202C;
   --dusty-pink: #45A29E;
   --coral: #66FCF1;
-  --sunset-orange: #C5A059;
-  --golden-yellow: #F0C420;
-  --warm-cream: #EAEFF2;
-  --cream-card: #151821;
-  --dark-brown: #FFFFFF; /* White text for black theme so it's 100% visible */
+  --sunset-orange: #F5A623;
+  --golden-yellow: #FFD700;
+  --warm-cream: #E2E8F0;
+  --cream-card: #121620;
+  --dark-brown: #FFFFFF; /* Base text color */
 }
 
-/* Midnight Black Theme Text Visibility & High Contrast Rules */
+/* ==========================================================================
+   MIDNIGHT BLACK THEME — 100% HIGH-CONTRAST & CLEAR TEXT VISIBILITY
+   ========================================================================== */
+
 body.midnight-mode {
+  background-color: #08090C !important;
   color: #FFFFFF !important;
 }
 
+/* Text Shadows: Use Sharp Black Drop Shadow (#000000) for HD Text Clarity */
+body.midnight-mode .font-display,
+body.midnight-mode .brand-logo,
+body.midnight-mode .page-title,
+body.midnight-mode .hero-title,
+body.midnight-mode .victory-banner,
 body.midnight-mode h1,
 body.midnight-mode h2,
 body.midnight-mode h3,
 body.midnight-mode h4,
 body.midnight-mode h5,
-body.midnight-mode h6,
-body.midnight-mode label,
-body.midnight-mode p,
-body.midnight-mode td,
-body.midnight-mode th,
-body.midnight-mode div,
-body.midnight-mode span {
-  color: inherit;
+body.midnight-mode h6 {
+  text-shadow: 2px 2px 0px #000000, 0 3px 10px rgba(0, 0, 0, 0.9) !important;
+  color: #FFFFFF;
 }
 
-/* Headings & Branding highlights in gold/cyan */
 body.midnight-mode .page-title,
 body.midnight-mode .hero-title span,
 body.midnight-mode .brand-logo,
 body.midnight-mode .player-name,
 body.midnight-mode .timer-box,
 body.midnight-mode .victory-banner {
-  color: var(--golden-yellow) !important;
+  color: #FFD700 !important;
 }
 
-/* Form Inputs in Midnight Mode */
-body.midnight-mode .retro-input {
-  background: #1F2430 !important;
-  color: #FFFFFF !important;
-  border-color: var(--coral) !important;
+body.midnight-mode p,
+body.midnight-mode span,
+body.midnight-mode label,
+body.midnight-mode td,
+body.midnight-mode th,
+body.midnight-mode div {
+  color: inherit;
 }
 
-body.midnight-mode .retro-input::placeholder {
-  color: #90A4AE !important;
-}
-
-/* Options Buttons for Multiple Choice in Midnight Mode */
-body.midnight-mode .option-btn {
-  background: #1F2430 !important;
-  color: #FFFFFF !important;
-  border-color: var(--coral) !important;
-}
-
-body.midnight-mode .option-btn:hover {
-  background: var(--dusty-pink) !important;
-  color: #FFFFFF !important;
-}
-
-body.midnight-mode .option-btn.selected {
-  background: var(--coral) !important;
-  color: #0B0C10 !important;
+/* Hero & Subtitle Text */
+body.midnight-mode .hero-tagline,
+body.midnight-mode .page-subtitle {
+  color: #E2E8F0 !important;
+  text-shadow: 1px 1px 3px #000000 !important;
 }
 
 /* Cards & Containers in Midnight Mode */
@@ -139,52 +131,202 @@ body.midnight-mode .stat-card,
 body.midnight-mode .chart-container,
 body.midnight-mode .leaderboard-container,
 body.midnight-mode .achievement-card,
-body.midnight-mode .archive-day-card {
-  background: #151821 !important;
-  border-color: #2E3846 !important;
+body.midnight-mode .archive-day-card,
+body.midnight-mode .profile-card {
+  background: #121620 !important;
+  border: 3px solid #2D3748 !important;
   color: #FFFFFF !important;
-  box-shadow: 0 6px 0 #050608, 0 10px 25px rgba(0, 0, 0, 0.7) !important;
+  box-shadow: 0 6px 0 #000000, 0 10px 25px rgba(0, 0, 0, 0.8) !important;
 }
 
-body.midnight-mode .archive-day-num,
-body.midnight-mode .stat-card-val,
-body.midnight-mode .puzzle-question-text,
-body.midnight-mode .hint-text,
-body.midnight-mode .achievement-title {
+body.midnight-mode .retro-card-header {
+  border-bottom-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Puzzle Text & Question Box */
+body.midnight-mode .puzzle-question-text {
   color: #FFFFFF !important;
+  text-shadow: none !important;
+}
+
+/* Form Inputs in Midnight Mode */
+body.midnight-mode .retro-input {
+  background: #1A202C !important;
+  color: #FFFFFF !important;
+  border: 2px solid #4A5568 !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+}
+
+body.midnight-mode .retro-input:focus {
+  border-color: #66FCF1 !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(102, 252, 241, 0.3) !important;
+}
+
+body.midnight-mode .retro-input::placeholder {
+  color: #90A4AE !important;
+}
+
+/* Multiple Choice Option Buttons */
+body.midnight-mode .option-btn {
+  background: #1A202C !important;
+  color: #FFFFFF !important;
+  border: 2px solid #4A5568 !important;
+  text-shadow: none !important;
+  box-shadow: 0 4px 0 #000000 !important;
+}
+
+body.midnight-mode .option-btn:hover {
+  background: #2D3748 !important;
+  color: #66FCF1 !important;
+  border-color: #66FCF1 !important;
+}
+
+body.midnight-mode .option-btn.selected {
+  background: #66FCF1 !important;
+  color: #0D1117 !important;
+  border-color: #66FCF1 !important;
+  font-weight: 700 !important;
+}
+
+/* Buttons in Midnight Mode */
+body.midnight-mode .btn-primary {
+  background: linear-gradient(135deg, #FFD700 0%, #F5A623 100%) !important;
+  color: #0D1117 !important;
+  border: 2px solid #000000 !important;
+  text-shadow: none !important;
+  box-shadow: 0 5px 0 #000000 !important;
+}
+
+body.midnight-mode .btn-secondary {
+  background: #2D3748 !important;
+  color: #FFFFFF !important;
+  border: 2px solid #4A5568 !important;
+  text-shadow: none !important;
+  box-shadow: 0 5px 0 #000000 !important;
+}
+
+body.midnight-mode .btn-outline {
+  background: transparent !important;
+  color: #FFD700 !important;
+  border: 2px solid #FFD700 !important;
+  text-shadow: none !important;
+}
+
+/* Auth Modal Specifics */
+body.midnight-mode .modal-content {
+  background: #121620 !important;
+  border: 3px solid #2D3748 !important;
+  color: #FFFFFF !important;
+}
+
+body.midnight-mode .modal-content h2,
+body.midnight-mode .modal-content label {
+  color: #FFFFFF !important;
+}
+
+body.midnight-mode .auth-tabs {
+  background: #1A202C !important;
+  border-color: #2D3748 !important;
+}
+
+body.midnight-mode .auth-tab-btn {
+  color: #E2E8F0 !important;
+}
+
+body.midnight-mode .auth-tab-btn.active {
+  background: #FFD700 !important;
+  color: #0D1117 !important;
+  box-shadow: 0 2px 0 #000000 !important;
+}
+
+/* Navigation Links */
+body.midnight-mode .nav-links {
+  background: rgba(18, 22, 32, 0.9) !important;
+  border-color: #2D3748 !important;
+}
+
+body.midnight-mode .nav-link {
+  color: #E2E8F0 !important;
+}
+
+body.midnight-mode .nav-link:hover,
+body.midnight-mode .nav-link.active {
+  background: #FFD700 !important;
+  color: #0D1117 !important;
+  box-shadow: 0 3px 0 #000000 !important;
+}
+
+body.midnight-mode .user-header-badge {
+  background: #2D3748 !important;
+  color: #FFD700 !important;
+  border-color: #4A5568 !important;
+  box-shadow: 0 3px 0 #000000 !important;
+}
+
+body.midnight-mode .header-coin-badge {
+  background: linear-gradient(135deg, #FFD700 0%, #F5A623 100%) !important;
+  color: #0D1117 !important;
+  border-color: #000000 !important;
+  box-shadow: 0 3px 0 #000000 !important;
+}
+
+/* Hints, Explanations, Share Boxes */
+body.midnight-mode .hint-item,
+body.midnight-mode .explanation-line-item,
+body.midnight-mode .share-card-box {
+  background: #1A202C !important;
+  color: #FFFFFF !important;
+  border-color: #2D3748 !important;
+}
+
+/* Stats Page & Leaderboards */
+body.midnight-mode .stat-card-val,
+body.midnight-mode .achievement-title,
+body.midnight-mode .archive-day-num {
+  color: #FFFFFF !important;
+  text-shadow: none !important;
 }
 
 body.midnight-mode .stat-card-label,
 body.midnight-mode .achievement-desc,
-body.midnight-mode .leaderboard-table th,
 body.midnight-mode .score-breakdown-table .row-label {
-  color: #B0BEC5 !important;
+  color: #A0AEC0 !important;
 }
 
-body.midnight-mode .hint-item,
-body.midnight-mode .explanation-line-item,
-body.midnight-mode .share-card-box {
-  background: #1F2430 !important;
-  color: #FFFFFF !important;
-  border-color: #2E3846 !important;
-}
-
-body.midnight-mode .auth-tab-btn {
-  color: #FFFFFF !important;
-}
-
-body.midnight-mode .auth-tab-btn.active {
-  color: #0B0C10 !important;
-  background: var(--golden-yellow) !important;
-}
-
-body.midnight-mode .leaderboard-table td,
 body.midnight-mode .leaderboard-table th {
-  border-color: #2E3846 !important;
+  color: #A0AEC0 !important;
+  border-bottom-color: #2D3748 !important;
+}
+
+body.midnight-mode .leaderboard-table td {
+  color: #FFFFFF !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 body.midnight-mode .leaderboard-table tr:hover {
-  background: rgba(102, 252, 241, 0.1) !important;
+  background: rgba(102, 252, 241, 0.08) !important;
+}
+
+/* Archive Variations */
+body.midnight-mode .archive-day-card.completed {
+  background: #1A2634 !important;
+  border-color: #4A5568 !important;
+}
+
+body.midnight-mode .archive-day-card.perfect {
+  background: linear-gradient(135deg, #2D3A4E 0%, #1A2634 100%) !important;
+  border-color: #FFD700 !important;
+}
+
+body.midnight-mode .archive-day-card.missed {
+  background: #251A24 !important;
+  border-color: #4A2D3A !important;
+}
+
+body.midnight-mode .archive-day-card.locked {
+  background: #0E1015 !important;
+  border-color: #1A202C !important;
+  opacity: 0.4 !important;
 }
 
 /* ==========================================================================
