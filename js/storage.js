@@ -76,15 +76,17 @@ class StorageManager {
 
       if (typeof potdAuth !== 'undefined' && potdAuth.isAuthenticated()) {
         const user = potdAuth.getCurrentUser();
-        if (user && typeof potdDB !== 'undefined' && potdDB.isReady) {
-          potdDB.updateUserStats(user.id, {
+        if (user && typeof potdDB !== 'undefined') {
+          const stats = {
             level: this.state.level,
             xp: this.state.xp,
             total_score: this.state.totalScore,
             current_streak: this.state.currentStreak,
             longest_streak: this.state.longestStreak,
             last_played_date: this.state.lastPlayedDate
-          });
+          };
+          if (potdDB.isReady) potdDB.updateUserStats(user.id, stats);
+          potdDB.syncUserProfileToFirestore(user.uid, stats);
         }
       }
     } catch (e) {

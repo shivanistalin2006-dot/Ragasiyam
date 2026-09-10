@@ -128,12 +128,15 @@ const AppRouter = {
       };
     });
 
+    const confirmGroup = document.getElementById('auth-confirm-group');
+
     if (tabLogin && tabSignup) {
       tabLogin.onclick = () => {
         activeTab = 'login';
         tabLogin.classList.add('active');
         tabSignup.classList.remove('active');
         if (emailGroup) emailGroup.style.display = 'none';
+        if (confirmGroup) confirmGroup.style.display = 'none';
         if (avatarGroup) avatarGroup.style.display = 'none';
         if (authSubmitBtn) authSubmitBtn.textContent = 'LOG IN 🚀';
         if (errorBanner) errorBanner.style.display = 'none';
@@ -144,6 +147,7 @@ const AppRouter = {
         tabSignup.classList.add('active');
         tabLogin.classList.remove('active');
         if (emailGroup) emailGroup.style.display = 'block';
+        if (confirmGroup) confirmGroup.style.display = 'block';
         if (avatarGroup) avatarGroup.style.display = 'block';
         if (authSubmitBtn) authSubmitBtn.textContent = 'CREATE ACCOUNT ✨';
         if (errorBanner) errorBanner.style.display = 'none';
@@ -157,13 +161,15 @@ const AppRouter = {
 
         const username = document.getElementById('auth-username-input')?.value;
         const password = document.getElementById('auth-password-input')?.value;
+        const confirmPassword = document.getElementById('auth-confirm-input')?.value;
         const email = document.getElementById('auth-email-input')?.value;
+        const rememberMe = document.getElementById('auth-remember-check')?.checked;
 
         try {
           if (activeTab === 'login') {
-            await potdAuth.login(username, password);
+            await potdAuth.login(username, password, rememberMe);
           } else {
-            await potdAuth.register(username, email, password, selectedAvatar);
+            await potdAuth.register(username, email, password, confirmPassword, selectedAvatar);
           }
           potdSound.playAchievement();
           if (authModal) authModal.classList.remove('active');
@@ -325,6 +331,38 @@ const AppRouter = {
             </div>
             <div class="chart-bar-val">${cnt}</div>
           </div>
+        `;
+      }).join('');
+    }
+
+    // Render Live Leaderboard
+    this.renderLeaderboard();
+  },
+
+  async renderLeaderboard() {
+    const leaderboardBody = document.getElementById('leaderboard-table-body');
+    if (leaderboardBody && typeof potdDB !== 'undefined') {
+      const topPlayers = await potdDB.fetchLeaderboard(10);
+      leaderboardBody.innerHTML = topPlayers.map((player, idx) => {
+        let rankBadge = `${idx + 1}`;
+        let rankClass = '';
+        if (idx === 0) { rankBadge = '🥇'; rankClass = 'rank-gold'; }
+        else if (idx === 1) { rankBadge = '🥈'; rankClass = 'rank-silver'; }
+        else if (idx === 2) { rankBadge = '🥉'; rankClass = 'rank-bronze'; }
+
+        return `
+          <tr>
+            <td class="leaderboard-rank ${rankClass}">${rankBadge}</td>
+            <td>
+              <div class="leaderboard-user-cell">
+                <span>${player.avatar || '🧩'}</span>
+                <span>${player.username}</span>
+              </div>
+            </td>
+            <td><strong>${(player.score || 0).toLocaleString()}</strong> pts</td>
+            <td>🔥 ${player.streak || 0}</td>
+            <td>Level ${player.level || 1}</td>
+          </tr>
         `;
       }).join('');
     }

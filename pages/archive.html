@@ -10,6 +10,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Luckiest+Guy&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+  <!-- Firebase Web SDK Compat CDNs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
   <!-- sql.js WebAssembly SQLite CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
 
@@ -113,6 +118,18 @@
           <input type="password" id="auth-password-input" class="retro-input" style="padding: 0.75rem 1rem; width: 100%; font-size: 1rem;" placeholder="••••••••" required />
         </div>
 
+        <div id="auth-confirm-group" style="display: none;">
+          <label style="font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: var(--dark-brown);">CONFIRM PASSWORD</label>
+          <input type="password" id="auth-confirm-input" class="retro-input" style="padding: 0.75rem 1rem; width: 100%; font-size: 1rem;" placeholder="••••••••" />
+        </div>
+
+        <div id="auth-remember-row" style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-heading); font-size: 0.85rem;">
+          <label style="cursor: pointer; display: flex; align-items: center; gap: 0.4rem;">
+            <input type="checkbox" id="auth-remember-check" checked /> Remember session
+          </label>
+          <a href="#" onclick="event.preventDefault(); potdAuth.forgotPassword(document.getElementById('auth-email-input')?.value || prompt('Enter your registered email:'))" style="color: var(--sunset-purple); font-weight: 700;">Forgot Password?</a>
+        </div>
+
         <div id="auth-avatar-group" style="display: none; text-align: center;">
           <label style="font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: var(--dark-brown);">CHOOSE AVATAR</label>
           <div class="avatar-selector-row">
@@ -127,11 +144,16 @@
         <button type="submit" id="auth-submit-btn" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 0.5rem;">
           LOG IN 🚀
         </button>
+
+        <button type="button" onclick="potdAuth.loginWithGoogle()" class="btn-google-auth">
+          <span>🌐</span> Sign In with Google
+        </button>
       </form>
     </div>
   </div>
 
   <!-- JavaScript Stack -->
+  <script src="../js/firebase-config.js"></script>
   <script src="../js/db.js"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/puzzles.js"></script>
