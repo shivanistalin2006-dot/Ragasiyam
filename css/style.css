@@ -69,7 +69,122 @@ body.midnight-mode {
   --golden-yellow: #F0C420;
   --warm-cream: #EAEFF2;
   --cream-card: #151821;
-  --dark-brown: #050608;
+  --dark-brown: #FFFFFF; /* White text for black theme so it's 100% visible */
+}
+
+/* Midnight Black Theme Text Visibility & High Contrast Rules */
+body.midnight-mode {
+  color: #FFFFFF !important;
+}
+
+body.midnight-mode h1,
+body.midnight-mode h2,
+body.midnight-mode h3,
+body.midnight-mode h4,
+body.midnight-mode h5,
+body.midnight-mode h6,
+body.midnight-mode label,
+body.midnight-mode p,
+body.midnight-mode td,
+body.midnight-mode th,
+body.midnight-mode div,
+body.midnight-mode span {
+  color: inherit;
+}
+
+/* Headings & Branding highlights in gold/cyan */
+body.midnight-mode .page-title,
+body.midnight-mode .hero-title span,
+body.midnight-mode .brand-logo,
+body.midnight-mode .player-name,
+body.midnight-mode .timer-box,
+body.midnight-mode .victory-banner {
+  color: var(--golden-yellow) !important;
+}
+
+/* Form Inputs in Midnight Mode */
+body.midnight-mode .retro-input {
+  background: #1F2430 !important;
+  color: #FFFFFF !important;
+  border-color: var(--coral) !important;
+}
+
+body.midnight-mode .retro-input::placeholder {
+  color: #90A4AE !important;
+}
+
+/* Options Buttons for Multiple Choice in Midnight Mode */
+body.midnight-mode .option-btn {
+  background: #1F2430 !important;
+  color: #FFFFFF !important;
+  border-color: var(--coral) !important;
+}
+
+body.midnight-mode .option-btn:hover {
+  background: var(--dusty-pink) !important;
+  color: #FFFFFF !important;
+}
+
+body.midnight-mode .option-btn.selected {
+  background: var(--coral) !important;
+  color: #0B0C10 !important;
+}
+
+/* Cards & Containers in Midnight Mode */
+body.midnight-mode .retro-card,
+body.midnight-mode .puzzle-main-card,
+body.midnight-mode .daily-preview-card,
+body.midnight-mode .modal-content,
+body.midnight-mode .stat-card,
+body.midnight-mode .chart-container,
+body.midnight-mode .leaderboard-container,
+body.midnight-mode .achievement-card,
+body.midnight-mode .archive-day-card {
+  background: #151821 !important;
+  border-color: #2E3846 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 6px 0 #050608, 0 10px 25px rgba(0, 0, 0, 0.7) !important;
+}
+
+body.midnight-mode .archive-day-num,
+body.midnight-mode .stat-card-val,
+body.midnight-mode .puzzle-question-text,
+body.midnight-mode .hint-text,
+body.midnight-mode .achievement-title {
+  color: #FFFFFF !important;
+}
+
+body.midnight-mode .stat-card-label,
+body.midnight-mode .achievement-desc,
+body.midnight-mode .leaderboard-table th,
+body.midnight-mode .score-breakdown-table .row-label {
+  color: #B0BEC5 !important;
+}
+
+body.midnight-mode .hint-item,
+body.midnight-mode .explanation-line-item,
+body.midnight-mode .share-card-box {
+  background: #1F2430 !important;
+  color: #FFFFFF !important;
+  border-color: #2E3846 !important;
+}
+
+body.midnight-mode .auth-tab-btn {
+  color: #FFFFFF !important;
+}
+
+body.midnight-mode .auth-tab-btn.active {
+  color: #0B0C10 !important;
+  background: var(--golden-yellow) !important;
+}
+
+body.midnight-mode .leaderboard-table td,
+body.midnight-mode .leaderboard-table th {
+  border-color: #2E3846 !important;
+}
+
+body.midnight-mode .leaderboard-table tr:hover {
+  background: rgba(102, 252, 241, 0.1) !important;
 }
 
 /* ==========================================================================
