@@ -1,4 +1,4 @@
-# 🧩 Puzzle of the Day
+# 🧩 RAGASIYAM — Puzzle of the Day
 
 > **"Give your brain something to chase."**
 
