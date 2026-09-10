@@ -129,6 +129,7 @@ const AppRouter = {
     });
 
     const confirmGroup = document.getElementById('auth-confirm-group');
+    const googleBtnText = document.getElementById('google-btn-text');
 
     if (tabLogin && tabSignup) {
       tabLogin.onclick = () => {
@@ -139,6 +140,7 @@ const AppRouter = {
         if (confirmGroup) confirmGroup.style.display = 'none';
         if (avatarGroup) avatarGroup.style.display = 'none';
         if (authSubmitBtn) authSubmitBtn.textContent = 'LOG IN 🚀';
+        if (googleBtnText) googleBtnText.textContent = 'Log In with Google';
         if (errorBanner) errorBanner.style.display = 'none';
       };
 
@@ -150,6 +152,7 @@ const AppRouter = {
         if (confirmGroup) confirmGroup.style.display = 'block';
         if (avatarGroup) avatarGroup.style.display = 'block';
         if (authSubmitBtn) authSubmitBtn.textContent = 'CREATE ACCOUNT ✨';
+        if (googleBtnText) googleBtnText.textContent = 'Sign Up with Google';
         if (errorBanner) errorBanner.style.display = 'none';
       };
     }
