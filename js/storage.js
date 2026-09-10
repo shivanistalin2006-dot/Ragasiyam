@@ -1,24 +1,34 @@
 /* ==========================================================================
-   PUZZLE OF THE DAY — LocalStorage State Manager
+   RAGASIYAM — LocalStorage State & Economy Manager
    ========================================================================== */
 
-const STORAGE_KEY = 'POTD_USER_STATE_V1';
+const STORAGE_KEY = 'POTD_USER_STATE_V2';
 
 const DEFAULT_STATE = {
-  playerName: 'Puzzle Challenger',
+  playerName: 'Ragasiyam Solver',
   avatarIcon: '🧩',
   totalScore: 0,
   xp: 0,
   level: 1,
+  coins: 100,
+  streakFreezes: 1,
+  perfectSolvesCount: 0,
+  totalPlayTime: 0,
   currentStreak: 0,
   longestStreak: 0,
   lastPlayedDate: null,
-  completedDays: {}, // { dayNum: { score, timeSpent, hintsUsed, perfect, solvedAt } }
-  unlockedAchievements: [], // Array of achievement IDs
+  completedDays: {},
+  unlockedAchievements: [],
+  inventory: {
+    themes: ['sunset', 'pink'],
+    hintTokens: 0
+  },
+  activeTheme: 'sunset',
   settings: {
     soundEnabled: true,
     reducedMotion: false,
-    pinkMode: false
+    pinkMode: false,
+    midnightMode: false
   }
 };
 
@@ -35,7 +45,7 @@ class StorageManager {
         return { ...DEFAULT_STATE, ...parsed };
       }
     } catch (e) {
-      console.warn('LocalStorage unavailable or corrupted, using default state.', e);
+      console.warn('LocalStorage warning, using default state.', e);
     }
     return { ...DEFAULT_STATE };
   }
@@ -45,7 +55,6 @@ class StorageManager {
     this.state.playerName = userObj.username;
     this.state.avatarIcon = userObj.avatar || '🧩';
     
-    // Load solves and achievements from SQLite DB
     if (typeof potdDB !== 'undefined' && potdDB.isReady) {
       const dbUser = potdDB.getUserByUsername(userObj.username);
       if (dbUser) {
@@ -65,7 +74,6 @@ class StorageManager {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
 
-      // Also sync to SQLite DB if user is logged in
       if (typeof potdAuth !== 'undefined' && potdAuth.isAuthenticated()) {
         const user = potdAuth.getCurrentUser();
         if (user && typeof potdDB !== 'undefined' && potdDB.isReady) {
@@ -96,10 +104,59 @@ class StorageManager {
     return !!this.state.completedDays[dayNum];
   }
 
+  // --- Economy & Inventory Helpers ---
+  addCoins(amount) {
+    this.state.coins = (this.state.coins || 0) + amount;
+    this.saveState();
+    return this.state.coins;
+  }
+
+  spendCoins(amount) {
+    if ((this.state.coins || 0) >= amount) {
+      this.state.coins -= amount;
+      this.saveState();
+      return true;
+    }
+    return false;
+  }
+
+  addStreakFreeze(count = 1) {
+    this.state.streakFreezes = (this.state.streakFreezes || 0) + count;
+    this.saveState();
+  }
+
+  useStreakFreeze() {
+    if ((this.state.streakFreezes || 0) > 0) {
+      this.state.streakFreezes -= 1;
+      this.saveState();
+      return true;
+    }
+    return false;
+  }
+
+  recordPerfectSolve() {
+    this.state.perfectSolvesCount = (this.state.perfectSolvesCount || 0) + 1;
+    this.saveState();
+  }
+
+  setActiveTheme(themeName) {
+    this.state.activeTheme = themeName;
+    if (themeName === 'pink') {
+      this.state.settings.pinkMode = true;
+      this.state.settings.midnightMode = false;
+    } else if (themeName === 'midnight') {
+      this.state.settings.pinkMode = false;
+      this.state.settings.midnightMode = true;
+    } else {
+      this.state.settings.pinkMode = false;
+      this.state.settings.midnightMode = false;
+    }
+    this.saveState();
+  }
+
   recordPuzzleSolve(dayNum, scoreData, timeSpent, hintsCount, isPerfect) {
     const todayStr = new Date().toISOString().split('T')[0];
     
-    // Save completion detail
     this.state.completedDays[dayNum] = {
       score: scoreData.finalScore,
       timeSpent: timeSpent,
@@ -108,17 +165,20 @@ class StorageManager {
       solvedAt: todayStr
     };
 
-    // Update totals
     this.state.totalScore += scoreData.finalScore;
+    this.state.totalPlayTime = (this.state.totalPlayTime || 0) + timeSpent;
+    if (isPerfect) this.recordPerfectSolve();
 
-    // Update XP (100 base + difficulty/perfect bonus)
+    // Award Coins
+    this.addCoins(scoreData.coinsEarned || 100);
+
+    // Update XP
     let xpGained = 100 + (isPerfect ? 50 : 0) + (hintsCount === 0 ? 30 : 0);
     this.addXP(xpGained);
 
     // Update Streak
     this.updateStreak(todayStr);
 
-    // Sync solve to SQLite DB
     if (typeof potdAuth !== 'undefined' && potdAuth.isAuthenticated()) {
       const user = potdAuth.getCurrentUser();
       if (user && typeof potdDB !== 'undefined' && potdDB.isReady) {
@@ -131,7 +191,6 @@ class StorageManager {
 
   addXP(amount) {
     this.state.xp += amount;
-    // Level calculation (Level up every 300 XP)
     const newLevel = Math.min(5, Math.floor(this.state.xp / 300) + 1);
     if (newLevel > this.state.level) {
       this.state.level = newLevel;
@@ -148,8 +207,17 @@ class StorageManager {
 
       if (diffDays === 1) {
         this.state.currentStreak += 1;
+        // Award free streak freeze every 7 days
+        if (this.state.currentStreak % 7 === 0) {
+          this.addStreakFreeze(1);
+        }
       } else if (diffDays > 1) {
-        this.state.currentStreak = 1; // Streak reset
+        // Missed day -> Check if Streak Freeze protects it!
+        if (this.useStreakFreeze()) {
+          console.log('🧊 Streak Freeze Used! Active streak protected.');
+        } else {
+          this.state.currentStreak = 1; // Reset if no freeze
+        }
       }
     }
 
@@ -157,12 +225,18 @@ class StorageManager {
     if (this.state.currentStreak > this.state.longestStreak) {
       this.state.longestStreak = this.state.currentStreak;
     }
+
+    // Unlock Midnight theme automatically on 7-day streak
+    if (this.state.currentStreak >= 7 && !this.state.inventory.themes.includes('midnight')) {
+      this.state.inventory.themes.push('midnight');
+    }
   }
 
   unlockAchievement(achievementId) {
     if (!this.state.unlockedAchievements.includes(achievementId)) {
       this.state.unlockedAchievements.push(achievementId);
-      this.addXP(50); // Achievement XP reward
+      this.addXP(50);
+      this.addCoins(100);
 
       if (typeof potdAuth !== 'undefined' && potdAuth.isAuthenticated()) {
         const user = potdAuth.getCurrentUser();
@@ -187,19 +261,14 @@ class StorageManager {
     return this.state.settings.soundEnabled;
   }
 
-  togglePinkMode(forceValue) {
-    if (forceValue !== undefined) {
-      this.state.settings.pinkMode = forceValue;
-    } else {
-      this.state.settings.pinkMode = !this.state.settings.pinkMode;
-    }
-    this.saveState();
+  togglePinkMode() {
+    this.setActiveTheme(this.state.activeTheme === 'pink' ? 'sunset' : 'pink');
     return this.state.settings.pinkMode;
   }
 
-  resetProgress() {
-    this.state = { ...DEFAULT_STATE };
-    this.saveState();
+  toggleMidnightMode() {
+    this.setActiveTheme(this.state.activeTheme === 'midnight' ? 'sunset' : 'midnight');
+    return this.state.settings.midnightMode;
   }
 }
 

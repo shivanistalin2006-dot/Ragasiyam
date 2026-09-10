@@ -1,5 +1,5 @@
 /* ==========================================================================
-   PUZZLE OF THE DAY — Core Game Logic Controller
+   RAGASIYAM — Core Gameplay Logic & Results Controller
    ========================================================================== */
 
 class GameController {
@@ -12,7 +12,6 @@ class GameController {
   }
 
   init() {
-    // Parse URL parameters for practice mode or specific day
     const urlParams = new URLSearchParams(window.location.search);
     const dayParam = urlParams.get('day');
     this.isPracticeMode = urlParams.get('practice') === 'true';
@@ -27,10 +26,7 @@ class GameController {
       this.currentPuzzle = PUZZLES_DATA[0];
     }
 
-    // Check if daily puzzle is already cracked
-    const state = potdStorage.getState();
     const existingResult = potdStorage.getCompletedPuzzle(this.currentPuzzle.day);
-
     if (existingResult && !this.isPracticeMode) {
       this.renderAlreadyCompletedScreen(existingResult);
       return;
@@ -65,14 +61,15 @@ class GameController {
   renderPuzzleScreen() {
     const p = this.currentPuzzle;
     
-    // Category & Difficulty badges
     const categoryBadge = document.getElementById('category-badge');
     const difficultyBadge = document.getElementById('difficulty-badge');
     const puzzleTitle = document.getElementById('puzzle-day-title');
     const questionText = document.getElementById('question-text');
+    const teaserEl = document.getElementById('puzzle-teaser-text');
 
     if (categoryBadge) {
-      categoryBadge.textContent = `${p.categoryIcon} ${p.categoryName}`;
+      const typeInfo = RIDDLE_TYPES[p.riddleType] || { name: p.categoryName, icon: p.categoryIcon };
+      categoryBadge.textContent = `${typeInfo.icon} ${typeInfo.name}`;
       categoryBadge.className = `category-badge cat-${p.category}`;
     }
 
@@ -82,14 +79,18 @@ class GameController {
     }
 
     if (puzzleTitle) {
-      puzzleTitle.textContent = `DAY #${p.day} — ${p.categoryName.toUpperCase()} PUZZLE`;
+      const formattedDay = String(p.day).padStart(3, '0');
+      puzzleTitle.textContent = `🌅 RAGASIYAM #${formattedDay} — TODAY'S MYSTERY`;
+    }
+
+    if (teaserEl) {
+      teaserEl.textContent = p.isSundayRagasiyam ? "👑 SUNDAY RAGASIYAM: One brutal puzzle. One chance. 2x Rewards!" : "Something is hidden. Can you uncover it?";
     }
 
     if (questionText) {
       questionText.innerText = p.question;
     }
 
-    // Render Answer Input (Text or Multiple Choice Options)
     const answerContainer = document.getElementById('answer-container');
     if (answerContainer) {
       answerContainer.innerHTML = '';
@@ -127,7 +128,6 @@ class GameController {
       }
     }
 
-    // Render Hints Section
     this.renderHints();
   }
 
@@ -198,7 +198,6 @@ class GameController {
 
     if (cleanUser === target) return true;
 
-    // Check alternate acceptable answers
     if (Array.isArray(this.currentPuzzle.alternateAnswers)) {
       return this.currentPuzzle.alternateAnswers.some(alt => alt.toLowerCase().trim() === cleanUser);
     }
@@ -213,7 +212,7 @@ class GameController {
     const mainCard = document.querySelector('.puzzle-main-card');
     if (mainCard) {
       mainCard.classList.remove('shake-animation');
-      void mainCard.offsetWidth; // Trigger reflow
+      void mainCard.offsetWidth;
       mainCard.classList.add('shake-animation');
     }
 
@@ -222,7 +221,7 @@ class GameController {
 
   handleTimeExpire() {
     potdSound.playWrong();
-    alert("⏱️ TIME EXPIRED! Don't worry, keep practicing and try another puzzle!");
+    alert("⏱️ TIME EXPIRED! Don't worry, keep practicing and try another mystery!");
     window.location.href = '../index.html';
   }
 
@@ -230,13 +229,12 @@ class GameController {
     this.isCompleted = true;
     potdTimer.stop();
     potdSound.playCorrect();
-    potdConfetti.burst(80);
+    potdConfetti.burst(90);
 
     const timeSpent = potdTimer.getTimeElapsed();
     const hintsCount = potdHints.getUnlockedCount();
     const isPerfect = (hintsCount === 0 && this.wrongAttempts === 0);
 
-    // Calculate score
     const scoreData = potdScoring.calculateScore({
       baseScore: this.currentPuzzle.baseScore || 1000,
       timeElapsed: timeSpent,
@@ -247,7 +245,6 @@ class GameController {
       currentStreak: potdStorage.getState().currentStreak
     });
 
-    // Record progress in storage if not practice mode
     if (!this.isPracticeMode) {
       potdStorage.recordPuzzleSolve(
         this.currentPuzzle.day,
@@ -257,7 +254,6 @@ class GameController {
         isPerfect
       );
 
-      // Check achievements
       const lastSolveContext = {
         timeSpent,
         hintsUsed: hintsCount,
@@ -273,7 +269,6 @@ class GameController {
       }
     }
 
-    // Show Victory Modal
     this.showVictoryModal(scoreData, timeSpent, isPerfect);
   }
 
@@ -284,28 +279,94 @@ class GameController {
     const timeFormatted = potdTimer.formatTime(timeSpent);
     document.getElementById('modal-solve-time').textContent = timeFormatted;
     document.getElementById('modal-percentile').textContent = `Faster than ${scoreData.percentile}% of today's solvers!`;
-    document.getElementById('modal-explanation').textContent = this.currentPuzzle.explanation;
+    
+    // Perfect Solve Banner
+    const perfectBannerEl = document.getElementById('modal-perfect-banner');
+    if (perfectBannerEl) {
+      if (isPerfect) {
+        perfectBannerEl.style.display = 'block';
+        perfectBannerEl.innerHTML = '✨ PERFECT SOLVE — No hints. No mistakes. Pure brain! (+100 🪙 Bonus)';
+      } else {
+        perfectBannerEl.style.display = 'none';
+      }
+    }
 
-    // Render score breakdown table
+    // Speed Rank Badge
+    const speedRankEl = document.getElementById('modal-speed-rank');
+    if (speedRankEl) {
+      speedRankEl.innerHTML = `⚡ ${scoreData.speedRank} RANK (${scoreData.speedRankTitle}) — ${scoreData.speedRankScore}/100`;
+    }
+
+    // Line-by-Line Explanation Reveal ("WHY? 🧐")
+    const explanationBox = document.getElementById('modal-explanation-box');
+    if (explanationBox) {
+      const lines = this.currentPuzzle.explanationLines || [this.currentPuzzle.explanation];
+      explanationBox.innerHTML = `
+        <div style="font-family: var(--font-heading); font-size: 1.1rem; color: var(--golden-yellow); margin-bottom: 0.5rem;">WHY? 🧐</div>
+        <div style="font-weight: 700; color: var(--warm-cream); margin-bottom: 0.6rem;">Answer: ${this.currentPuzzle.answer.toUpperCase()}</div>
+        ${lines.map((line, idx) => `
+          <div class="explanation-line-item" style="animation-delay: ${idx * 0.4}s;">
+            💡 ${line}
+          </div>
+        `).join('')}
+      `;
+    }
+
+    // Score Table
     const tableBody = document.getElementById('modal-score-table');
     if (tableBody) {
       tableBody.innerHTML = `
         <tr><td class="row-label">Base Score</td><td class="row-val val-plus">+${scoreData.baseScore}</td></tr>
         <tr><td class="row-label">Speed Bonus</td><td class="row-val val-plus">+${scoreData.speedBonus}</td></tr>
-        <tr><td class="row-label">Streak Bonus</td><td class="row-val val-plus">+${scoreData.streakBonus}</td></tr>
-        ${scoreData.noHintBonus ? `<tr><td class="row-label">No Hint Bonus</td><td class="row-val val-plus">+${scoreData.noHintBonus}</td></tr>` : ''}
+        <tr><td class="row-label">Coins Earned</td><td class="row-val val-plus">+${scoreData.coinsEarned} 🪙</td></tr>
         ${scoreData.firstAttemptBonus ? `<tr><td class="row-label">1st Attempt Bonus</td><td class="row-val val-plus">+${scoreData.firstAttemptBonus}</td></tr>` : ''}
+        ${scoreData.perfectSolveBonus ? `<tr><td class="row-label">Perfect Solve Bonus</td><td class="row-val val-plus">+${scoreData.perfectSolveBonus}</td></tr>` : ''}
         ${scoreData.hintPenalty ? `<tr><td class="row-label">Hint Penalty</td><td class="row-val val-minus">-${scoreData.hintPenalty}</td></tr>` : ''}
-        ${scoreData.attemptPenalty ? `<tr><td class="row-label">Wrong Attempt Penalty</td><td class="row-val val-minus">-${scoreData.attemptPenalty}</td></tr>` : ''}
         <tr class="total-row"><td class="row-label">FINAL SCORE</td><td class="row-val" id="modal-final-score-num">0</td></tr>
+      `;
+    }
+
+    // Challenge Share Card
+    const shareCardEl = document.getElementById('modal-share-card');
+    if (shareCardEl) {
+      const formattedDay = String(this.currentPuzzle.day).padStart(3, '0');
+      const shareText = `🔥 RAGASIYAM #${formattedDay}\n⚡ Solved in ${timeFormatted} | ${scoreData.speedRank} Rank (${scoreData.speedRankScore}/100)\n🏆 Score: ${scoreData.finalScore} | 🔥 ${potdStorage.getState().currentStreak} Day Streak\nCan you beat my brain? 🧩\nhttps://shivanistalin2006-dot.github.io/Ragasiyam/`;
+
+      shareCardEl.innerHTML = `
+        <div class="share-card-box">${shareText}</div>
+        <button type="button" class="btn btn-outline btn-sm" style="width: 100%;" onclick="gameApp.copyShareCard(\`${shareText.replace(/\n/g, '\\n')}\`)">
+          📋 COPY CHALLENGE CARD
+        </button>
       `;
     }
 
     modalOverlay.classList.add('active');
 
-    // Animate final score
     const finalScoreEl = document.getElementById('modal-final-score-num');
     UIUtils.animateNumber(finalScoreEl, 0, scoreData.finalScore, 1200);
+  }
+
+  copyShareCard(text) {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      this.showToast('📋 Challenge card copied to clipboard!');
+      potdSound.playClick();
+    } else {
+      this.showToast('Please copy the text manually!');
+    }
+  }
+
+  openMysteryBox() {
+    potdSound.playAchievement();
+    potdConfetti.burst(60);
+    const rewards = ['+150 🪙 Coins', '+100 XP', '🧊 1x Streak Freeze', '💡 1x Free Hint Token'];
+    const won = rewards[Math.floor(Math.random() * rewards.length)];
+
+    if (won.includes('Coins')) potdStorage.addCoins(150);
+    if (won.includes('Freeze')) potdStorage.addStreakFreeze(1);
+    if (won.includes('XP')) potdStorage.addXP(100);
+
+    alert(`🎁 RAGASIYAM MYSTERY BOX REWARD:\n\nYou won: ${won}!`);
   }
 
   renderAlreadyCompletedScreen(savedData) {
@@ -313,12 +374,13 @@ class GameController {
     if (mainCard) {
       mainCard.innerHTML = `
         <div style="text-align: center; padding: 2rem;">
-          <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
-          <h2 class="font-display" style="font-size: 2.2rem; color: var(--dark-brown); margin-bottom: 0.5rem;">TODAY'S PUZZLE IS CRACKED!</h2>
-          <p style="font-size: 1.1rem; color: #555; margin-bottom: 1.5rem;">You solved today's puzzle with a score of <strong>${savedData.score}</strong> in <strong>${potdTimer.formatTime(savedData.timeSpent)}</strong>!</p>
-          <div style="display: flex; gap: 1rem; justify-content: center;">
+          <div style="font-size: 4rem; margin-bottom: 1rem;">🌅</div>
+          <h2 class="font-display" style="font-size: 2.2rem; color: var(--dark-brown); margin-bottom: 0.5rem;">TODAY'S MYSTERY IS SOLVED!</h2>
+          <p style="font-size: 1.1rem; color: #555; margin-bottom: 1.5rem;">You solved today's mystery with a score of <strong>${savedData.score}</strong> in <strong>${potdTimer.formatTime(savedData.timeSpent)}</strong>!</p>
+          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <button onclick="gameApp.openMysteryBox()" class="btn btn-primary glow-effect">🎁 OPEN MYSTERY BOX</button>
             <a href="archive.html" class="btn btn-secondary">Explore Archive</a>
-            <a href="stats.html" class="btn btn-primary">View My Stats</a>
+            <a href="stats.html" class="btn btn-outline">View Stats</a>
           </div>
         </div>
       `;

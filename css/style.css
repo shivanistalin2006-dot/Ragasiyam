@@ -59,6 +59,19 @@ body.pink-mode {
   --dark-brown: #380820;
 }
 
+/* Midnight Ragasiyam Cosmic Theme Mode */
+body.midnight-mode {
+  --deep-plum: #0B0C10;
+  --sunset-purple: #1F2833;
+  --dusty-pink: #45A29E;
+  --coral: #66FCF1;
+  --sunset-orange: #C5A059;
+  --golden-yellow: #F0C420;
+  --warm-cream: #EAEFF2;
+  --cream-card: #151821;
+  --dark-brown: #050608;
+}
+
 /* ==========================================================================
    Global Reset & Base
    ========================================================================== */
@@ -1354,4 +1367,73 @@ a {
   margin-bottom: 1rem;
   display: none;
 }
+
+/* Header Coin & Economy Badges */
+.header-coin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: linear-gradient(135deg, #FFE082 0%, var(--sunset-orange) 100%);
+  color: var(--dark-brown);
+  padding: 0.35rem 0.8rem;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--dark-brown);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.85rem;
+  box-shadow: var(--shadow-retro-sm);
+  cursor: pointer;
+}
+
+.perfect-solve-banner {
+  background: linear-gradient(135deg, #FFE082 0%, #FFB300 100%);
+  color: var(--dark-brown);
+  border: 3px solid var(--dark-brown);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.2rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 15px rgba(246, 197, 107, 0.6);
+  animation: bounceSlow 2s infinite ease-in-out;
+}
+
+.speed-rank-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--sunset-purple);
+  color: var(--golden-yellow);
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--dark-brown);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  margin: 0.5rem 0;
+}
+
+.explanation-line-item {
+  background: var(--warm-cream);
+  border: 2px solid var(--dark-brown);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.9rem;
+  margin-top: 0.4rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--dark-brown);
+  animation: fadeInScale 0.5s ease-out forwards;
+}
+
+.share-card-box {
+  background: var(--warm-cream);
+  border: 3px dashed var(--dark-brown);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  color: var(--dark-brown);
+  margin: 1rem 0;
+  white-space: pre-line;
+}
+
 

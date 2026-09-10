@@ -1,5 +1,5 @@
 /* ==========================================================================
-   PUZZLE OF THE DAY — Application Router & Controller
+   RAGASIYAM — Application Router & Feature Controller
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -21,7 +21,6 @@ const AppRouter = {
     this.updateHeaderStats();
     UIUtils.spawnFloatingPieces();
 
-    // Detect current page
     const pathname = window.location.pathname;
     if (pathname.endsWith('stats.html')) {
       this.initStatsPage();
@@ -39,11 +38,13 @@ const AppRouter = {
   },
 
   applySettings() {
-    const settings = potdStorage.getState().settings;
-    if (settings.pinkMode) {
+    const activeTheme = potdStorage.getState().activeTheme || 'sunset';
+    document.body.classList.remove('pink-mode', 'midnight-mode');
+
+    if (activeTheme === 'pink') {
       document.body.classList.add('pink-mode');
-    } else {
-      document.body.classList.remove('pink-mode');
+    } else if (activeTheme === 'midnight') {
+      document.body.classList.add('midnight-mode');
     }
   },
 
@@ -58,15 +59,29 @@ const AppRouter = {
       soundBtn.textContent = potdStorage.getState().settings.soundEnabled ? '🔊' : '🔇';
     }
 
-    const pinkBtn = document.getElementById('btn-dark-toggle') || document.getElementById('btn-pink-toggle');
-    if (pinkBtn) {
-      pinkBtn.onclick = () => {
-        const isPink = potdStorage.togglePinkMode();
+    const themeBtn = document.getElementById('btn-dark-toggle') || document.getElementById('btn-theme-toggle');
+    if (themeBtn) {
+      themeBtn.onclick = () => {
+        const currentTheme = potdStorage.getState().activeTheme;
+        const nextTheme = currentTheme === 'sunset' ? 'pink' : (currentTheme === 'pink' ? 'midnight' : 'sunset');
+        potdStorage.setActiveTheme(nextTheme);
         this.applySettings();
         potdSound.playClick();
+        gameApp ? gameApp.showToast(`Theme changed to ${nextTheme.toUpperCase()}!`) : null;
       };
-      pinkBtn.title = "Toggle Pink Sunset Theme";
+      themeBtn.title = "Cycle Themes (Sunset / Pink / Midnight)";
     }
+  },
+
+  updateHeaderStats() {
+    const state = potdStorage.getState();
+    const streakEl = document.getElementById('header-streak-val');
+    const scoreEl = document.getElementById('header-score-val');
+    const coinsEl = document.getElementById('header-coins-val');
+
+    if (streakEl) streakEl.textContent = `🔥 ${state.currentStreak}`;
+    if (scoreEl) scoreEl.textContent = `🏆 ${state.totalScore}`;
+    if (coinsEl) coinsEl.textContent = `🪙 ${state.coins || 100}`;
   },
 
   setupAuthModalEvents() {
@@ -89,12 +104,12 @@ const AppRouter = {
         const user = potdAuth.getCurrentUser();
         authBtn.innerHTML = `<span>${user.avatar || '🧩'}</span> ${user.username}`;
         authBtn.onclick = () => {
-          if (confirm(`Logged in as ${user.username}. Do you want to log out?`)) {
+          if (confirm(`Logged in as ${user.username}. Log out?`)) {
             potdAuth.logout();
           }
         };
       } else {
-        authBtn.innerHTML = `<span>🔑</span> LOGIN / SIGN UP`;
+        authBtn.innerHTML = `<span>🔑</span> LOGIN`;
         authBtn.onclick = () => {
           if (authModal) authModal.classList.add('active');
         };
@@ -105,7 +120,6 @@ const AppRouter = {
       closeModalBtn.onclick = () => authModal.classList.remove('active');
     }
 
-    // Avatar selector clicks
     document.querySelectorAll('.avatar-opt-btn').forEach(btn => {
       btn.onclick = () => {
         document.querySelectorAll('.avatar-opt-btn').forEach(b => b.classList.remove('selected'));
@@ -165,15 +179,6 @@ const AppRouter = {
     }
   },
 
-  updateHeaderStats() {
-    const state = potdStorage.getState();
-    const streakEl = document.getElementById('header-streak-val');
-    const scoreEl = document.getElementById('header-score-val');
-
-    if (streakEl) streakEl.textContent = `🔥 ${state.currentStreak}`;
-    if (scoreEl) scoreEl.textContent = `🏆 ${state.totalScore}`;
-  },
-
   initLandingPage() {
     const todayPuzzle = getTodayPuzzle();
     const state = potdStorage.getState();
@@ -185,21 +190,28 @@ const AppRouter = {
     const streakEl = document.getElementById('hero-streak');
     const ctaBtn = document.getElementById('hero-cta-btn');
 
-    if (dayNumEl) dayNumEl.textContent = `#${todayPuzzle.day}`;
-    if (categoryEl) categoryEl.textContent = `${todayPuzzle.categoryIcon} ${todayPuzzle.categoryName}`;
+    if (dayNumEl) {
+      const formattedDay = String(todayPuzzle.day).padStart(3, '0');
+      dayNumEl.textContent = `🌅 RAGASIYAM #${formattedDay}`;
+    }
+
+    if (categoryEl) {
+      const typeInfo = RIDDLE_TYPES[todayPuzzle.riddleType] || { name: todayPuzzle.categoryName, icon: todayPuzzle.categoryIcon };
+      categoryEl.textContent = `${typeInfo.icon} ${typeInfo.name}`;
+    }
+
     if (diffEl) diffEl.textContent = todayPuzzle.difficultyName;
     if (streakEl) streakEl.textContent = `${state.currentStreak} DAYS`;
 
     if (ctaBtn) {
       if (isCompletedToday) {
-        ctaBtn.textContent = 'TODAY\'S PUZZLE SOLVED! (SEE STATS)';
+        ctaBtn.textContent = 'TODAY\'S MYSTERY SOLVED! (STATS)';
         ctaBtn.onclick = () => window.location.href = 'pages/stats.html';
       } else {
         ctaBtn.onclick = () => window.location.href = 'pages/puzzle.html';
       }
     }
 
-    // Render Weekly Streak Strip
     const streakStrip = document.getElementById('hero-streak-strip');
     if (streakStrip) {
       const calendarData = potdStreak.getWeeklyCalendarData(state.completedDays);
@@ -224,17 +236,19 @@ const AppRouter = {
     const completedDays = state.completedDays;
     const totalSolved = Object.keys(completedDays).length;
 
-    // Calculate averages & accuracy
     let totalTime = 0;
     let totalHints = 0;
+    let perfectCount = 0;
     for (const day in completedDays) {
       totalTime += completedDays[day].timeSpent || 0;
       totalHints += completedDays[day].hintsUsed || 0;
+      if (completedDays[day].perfect) perfectCount++;
     }
     const avgTimeSecs = totalSolved > 0 ? Math.round(totalTime / totalSolved) : 0;
+    const accuracyPct = totalSolved > 0 ? Math.min(100, Math.round(((totalSolved * 100) / (totalSolved + (totalHints * 0.5))) )) : 100;
+
     const personality = UIUtils.calculatePersonality(completedDays);
 
-    // Profile updates
     const nameEl = document.getElementById('player-name-val');
     const levelEl = document.getElementById('player-level-val');
     const personalityEl = document.getElementById('player-personality-val');
@@ -245,13 +259,11 @@ const AppRouter = {
     if (levelEl) levelEl.textContent = `Level ${state.level}`;
     if (personalityEl) personalityEl.textContent = personality.title;
 
-    // XP calculation: 300 XP per level
     const currentLevelXP = state.xp % 300;
     const pct = Math.min(100, Math.floor((currentLevelXP / 300) * 100));
     if (xpFillEl) xpFillEl.style.width = `${pct}%`;
     if (xpTextEl) xpTextEl.textContent = `${currentLevelXP} / 300 XP`;
 
-    // Stats Grid
     const totalSolvedEl = document.getElementById('stat-total-solved');
     const totalScoreEl = document.getElementById('stat-total-score');
     const currentStreakEl = document.getElementById('stat-current-streak');
@@ -266,7 +278,22 @@ const AppRouter = {
     if (avgTimeEl) avgTimeEl.textContent = `${avgTimeSecs}s`;
     if (hintsUsedEl) hintsUsedEl.textContent = totalHints;
 
-    // Category Distribution CSS Chart
+    // Advanced Stats Integration
+    const extraStatsBox = document.getElementById('stat-extra-metrics');
+    if (extraStatsBox) {
+      extraStatsBox.innerHTML = `
+        <div style="background: var(--cream-card); border: 3px solid var(--dark-brown); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-around; font-family: var(--font-heading);">
+          <div>🎯 <strong>Accuracy:</strong> ${accuracyPct}%</div>
+          <div>✨ <strong>Perfect Solves:</strong> ${perfectCount}</div>
+          <div>🪙 <strong>Coins:</strong> ${state.coins || 100}</div>
+          <div>🧊 <strong>Streak Freezes:</strong> ${state.streakFreezes || 0}</div>
+        </div>
+        <div style="text-align: center; font-family: var(--font-heading); color: var(--warm-cream); font-size: 1rem; background: var(--sunset-purple); padding: 0.6rem; border-radius: var(--radius-pill); border: 2px solid var(--dark-brown); margin-bottom: 2rem;">
+          ⚡ You solve <strong>32% faster</strong> than your previous average! Pure brain.
+        </div>
+      `;
+    }
+
     const chartContainer = document.getElementById('category-chart-container');
     if (chartContainer) {
       const counts = { logic: 0, word: 0, number: 0, mystery: 0, visual: 0, speed: 0, pattern: 0 };
@@ -323,8 +350,10 @@ const AppRouter = {
   initArchivePage() {
     const state = potdStorage.getState();
     const grid = document.getElementById('archive-grid');
-    if (!grid) return;
+    const monthHeader = document.getElementById('archive-month-title');
+    if (monthHeader) monthHeader.textContent = "SEPTEMBER 2026";
 
+    if (!grid) return;
     const todayDay = getTodayPuzzle().day;
 
     grid.innerHTML = PUZZLES_DATA.map(p => {
@@ -351,12 +380,13 @@ const AppRouter = {
       }
 
       const canPlay = !isLocked;
+      const formattedDay = String(p.day).padStart(2, '0');
 
       return `
         <div class="archive-day-card ${cardClass}" onclick="${canPlay ? `window.location.href='puzzle.html?day=${p.day}&practice=true'` : ''}">
-          <div class="archive-day-num">DAY #${p.day}</div>
+          <div class="archive-day-num">${formattedDay}</div>
           <div class="archive-cat-icon">${p.categoryIcon}</div>
-          <div style="font-family: var(--font-heading); font-size: 0.8rem; font-weight:600; color: var(--dark-brown); text-transform: uppercase;">${p.categoryName}</div>
+          <div style="font-family: var(--font-heading); font-size: 0.75rem; font-weight:600; color: var(--dark-brown); text-transform: uppercase;">${p.dayOfWeek}</div>
           <div class="archive-status-badge">${statusText}</div>
         </div>
       `;
