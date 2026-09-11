@@ -116,6 +116,15 @@ const AppRouter = {
       }
     }
 
+    // Auto-prompt login modal immediately on load if user is not logged in
+    if (typeof potdAuth !== 'undefined' && !potdAuth.isAuthenticated()) {
+      if (authModal) {
+        setTimeout(() => {
+          authModal.classList.add('active');
+        }, 350);
+      }
+    }
+
     if (closeModalBtn && authModal) {
       closeModalBtn.onclick = () => authModal.classList.remove('active');
     }
