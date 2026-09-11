@@ -1780,5 +1780,148 @@ a {
   font-weight: 700;
 }
 
+/* ==========================================================================
+   RAGASIYAM STREAK GOAL & REMINDER COMPONENTS
+   ========================================================================== */
+
+.streak-goal-widget {
+  background: rgba(42, 23, 56, 0.25);
+  border: 3px solid var(--dark-brown);
+  border-radius: var(--radius-md);
+  padding: 1.2rem;
+  margin: 1rem 0;
+  box-shadow: var(--shadow-retro-sm);
+}
+
+body.midnight-mode .streak-goal-widget {
+  background: #1A202C !important;
+  border-color: #2D3748 !important;
+}
+
+.streak-goal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.goal-count-badge {
+  background: var(--golden-yellow);
+  color: var(--dark-brown);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--dark-brown);
+  font-size: 0.85rem;
+}
+
+body.midnight-mode .goal-count-badge {
+  background: #FFD700 !important;
+  color: #08090C !important;
+  border-color: #000 !important;
+}
+
+.streak-progress-outer {
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid var(--dark-brown);
+  border-radius: var(--radius-pill);
+  height: 20px;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.streak-progress-inner {
+  height: 100%;
+  background: linear-gradient(90deg, var(--sunset-orange) 0%, var(--golden-yellow) 100%);
+  border-radius: var(--radius-pill);
+  transition: width 0.8s ease-out;
+}
+
+.streak-progress-text-bar {
+  font-family: monospace, sans-serif;
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  opacity: 0.9;
+}
+
+.streak-goal-subtext {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 0.3rem;
+  color: var(--golden-yellow);
+}
+
+.goal-opt-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: var(--warm-cream);
+  border: 2.5px solid var(--dark-brown);
+  border-radius: var(--radius-md);
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  color: var(--dark-brown);
+  transition: all var(--transition-fast);
+}
+
+body.midnight-mode .goal-opt-btn {
+  background: #1A202C !important;
+  border-color: #4A5568 !important;
+  color: #FFFFFF !important;
+}
+
+.goal-opt-btn:hover {
+  background: var(--golden-yellow);
+  transform: translateX(4px);
+}
+
+body.midnight-mode .goal-opt-btn:hover {
+  background: #2D3748 !important;
+  color: #66FCF1 !important;
+}
+
+.goal-opt-btn.selected {
+  background: linear-gradient(135deg, var(--golden-yellow) 0%, var(--sunset-orange) 100%);
+  color: var(--dark-brown);
+  border-color: var(--dark-brown);
+  box-shadow: 0 4px 0 var(--dark-brown);
+  font-weight: 700;
+}
+
+body.midnight-mode .goal-opt-btn.selected {
+  background: linear-gradient(135deg, #FFD700 0%, #F5A623 100%) !important;
+  color: #08090C !important;
+  border-color: #000 !important;
+}
+
+.opt-icon {
+  font-size: 1.4rem;
+}
+
+/* Streak Reminder Banner */
+.streak-reminder-banner {
+  background: linear-gradient(135deg, #E77A61 0%, #D94D4D 100%);
+  border: 3px solid var(--dark-brown);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-retro);
+  animation: pulseNotice 2s infinite ease-in-out;
+}
+
+@keyframes pulseNotice {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.01); }
+}
+
 
 

@@ -164,6 +164,67 @@
     </div>
   </div>
 
+  <!-- Streak Goal Selector Modal -->
+  <div id="streak-goal-modal" class="modal-overlay">
+    <div class="modal-content animate-fade-in" style="max-width: 480px;">
+      <button id="streak-goal-modal-close" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: inherit;">✖</button>
+      
+      <div style="font-size: 2.8rem; margin-bottom: 0.3rem;">🔥</div>
+      <h2 class="font-display" style="font-size: 1.8rem; margin-bottom: 0.3rem; color: var(--golden-yellow);">RAGASIYAM STREAK GOAL</h2>
+      <p style="font-family: var(--font-heading); font-size: 0.95rem; margin-bottom: 1.2rem; opacity: 0.9;">How long do you want to keep your streak?</p>
+
+      <div class="streak-goal-options-grid" style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.2rem;">
+        <button type="button" class="goal-opt-btn" data-goal="3">
+          <span class="opt-icon">🌱</span>
+          <div class="opt-text"><strong>3 Days</strong> — Just starting</div>
+        </button>
+        <button type="button" class="goal-opt-btn selected" data-goal="7">
+          <span class="opt-icon">🔥</span>
+          <div class="opt-text"><strong>7 Days</strong> — Weekly challenge</div>
+        </button>
+        <button type="button" class="goal-opt-btn" data-goal="30">
+          <span class="opt-icon">⚡</span>
+          <div class="opt-text"><strong>30 Days</strong> — Serious player</div>
+        </button>
+        <button type="button" class="goal-opt-btn" data-goal="100">
+          <span class="opt-icon">👑</span>
+          <div class="opt-text"><strong>100 Days</strong> — Ragasiyam Master</div>
+        </button>
+        <button type="button" class="goal-opt-btn" data-goal="custom">
+          <span class="opt-icon">🎯</span>
+          <div class="opt-text"><strong>Custom Goal</strong> — Choose your own</div>
+        </button>
+        <button type="button" class="goal-opt-btn" data-goal="none">
+          <span class="opt-icon">🚫</span>
+          <div class="opt-text"><strong>No Goal</strong> — Play casually</div>
+        </button>
+      </div>
+
+      <div id="custom-goal-input-row" style="display: none; margin-bottom: 1rem;">
+        <input type="number" id="custom-goal-val" class="retro-input" min="1" max="999" placeholder="Enter target days (e.g. 15)" style="text-align: center; font-size: 1.1rem; padding: 0.6rem;" />
+      </div>
+
+      <!-- Reminder Setup Section -->
+      <div style="background: rgba(0,0,0,0.15); padding: 1rem; border-radius: var(--radius-md); border: 2px dashed rgba(255,255,255,0.2); margin-bottom: 1.2rem; text-align: left;">
+        <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-heading); font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem;">
+          <input type="checkbox" id="streak-reminder-check" checked /> 🔔 Remind me to maintain my streak
+        </label>
+        <div id="reminder-timing-select-row" style="display: flex; gap: 0.5rem; align-items: center; font-size: 0.85rem;">
+          <span style="font-family: var(--font-heading);">Timing:</span>
+          <select id="streak-reminder-time-opt" class="retro-input" style="padding: 0.3rem 0.6rem; font-size: 0.85rem; flex: 1;">
+            <option value="09:00">🌅 Morning — 9:00 AM</option>
+            <option value="13:00">☀️ Afternoon — 1:00 PM</option>
+            <option value="19:00" selected>🌙 Evening — 7:00 PM</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="button" id="save-streak-goal-btn" class="btn btn-primary btn-lg" style="width: 100%;">
+        SET STREAK GOAL 🔥
+      </button>
+    </div>
+  </div>
+
   <!-- JavaScript Stack -->
   <script src="../js/firebase-config.js"></script>
   <script src="../js/db.js"></script>

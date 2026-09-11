@@ -16,6 +16,11 @@ const DEFAULT_STATE = {
   totalPlayTime: 0,
   currentStreak: 0,
   longestStreak: 0,
+  streakGoal: 7, // Default 7 days (or 'none' for casual)
+  reminderSettings: {
+    enabled: true,
+    timing: '09:00'
+  },
   lastPlayedDate: null,
   completedDays: {},
   unlockedAchievements: [],
@@ -199,6 +204,18 @@ class StorageManager {
     }
   }
 
+  setStreakGoal(goal) {
+    this.state.streakGoal = goal;
+    this.saveState();
+    return this.state.streakGoal;
+  }
+
+  setReminderSettings(enabled, timing) {
+    this.state.reminderSettings = { enabled, timing };
+    this.saveState();
+    return this.state.reminderSettings;
+  }
+
   updateStreak(todayStr) {
     if (!this.state.lastPlayedDate) {
       this.state.currentStreak = 1;
@@ -227,6 +244,21 @@ class StorageManager {
     if (this.state.currentStreak > this.state.longestStreak) {
       this.state.longestStreak = this.state.currentStreak;
     }
+
+    // Milestone Rewards Table
+    const streak = this.state.currentStreak;
+    if (streak === 3) this.addCoins(50);
+    else if (streak === 7) {
+      this.addCoins(100);
+      this.addStreakFreeze(1);
+    } else if (streak === 14) this.addCoins(150);
+    else if (streak === 30) {
+      this.addCoins(200);
+      if (!this.state.inventory.themes.includes('midnight')) {
+        this.state.inventory.themes.push('midnight');
+      }
+    } else if (streak === 50) this.addCoins(300);
+    else if (streak === 100) this.addCoins(500);
 
     // Unlock Midnight theme automatically on 7-day streak
     if (this.state.currentStreak >= 7 && !this.state.inventory.themes.includes('midnight')) {

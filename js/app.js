@@ -18,7 +18,10 @@ const AppRouter = {
     this.applySettings();
     this.setupGlobalEvents();
     this.setupAuthModalEvents();
+    this.setupStreakGoalModalEvents();
     this.updateHeaderStats();
+    this.renderStreakGoalWidgets();
+    this.checkStreakReminderBanner();
     UIUtils.spawnFloatingPieces();
 
     const pathname = window.location.pathname;
@@ -441,5 +444,121 @@ const AppRouter = {
         </div>
       `;
     }).join('');
+  },
+
+  setupStreakGoalModalEvents() {
+    const goalModal = document.getElementById('streak-goal-modal');
+    const closeBtn = document.getElementById('streak-goal-modal-close');
+    const saveBtn = document.getElementById('save-streak-goal-btn');
+    const customRow = document.getElementById('custom-goal-input-row');
+    const customInput = document.getElementById('custom-goal-val');
+
+    let selectedGoalVal = potdStorage.getState().streakGoal || 7;
+
+    if (closeBtn && goalModal) {
+      closeBtn.onclick = () => goalModal.classList.remove('active');
+    }
+
+    document.querySelectorAll('.goal-opt-btn').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('.goal-opt-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        const goalVal = btn.getAttribute('data-goal');
+        selectedGoalVal = goalVal;
+
+        if (goalVal === 'custom') {
+          if (customRow) customRow.style.display = 'block';
+        } else {
+          if (customRow) customRow.style.display = 'none';
+        }
+      };
+    });
+
+    if (saveBtn) {
+      saveBtn.onclick = () => {
+        let finalGoal = selectedGoalVal;
+        if (selectedGoalVal === 'custom') {
+          finalGoal = parseInt(customInput?.value, 10) || 7;
+        }
+
+        potdStorage.setStreakGoal(finalGoal);
+
+        const reminderCheck = document.getElementById('streak-reminder-check');
+        const reminderTimeOpt = document.getElementById('streak-reminder-time-opt');
+        const reminderEnabled = reminderCheck ? reminderCheck.checked : true;
+        const reminderTiming = reminderTimeOpt ? reminderTimeOpt.value : '09:00';
+
+        potdStorage.setReminderSettings(reminderEnabled, reminderTiming);
+
+        if (reminderEnabled && window.Notification && Notification.permission !== 'granted') {
+          Notification.requestPermission();
+        }
+
+        if (goalModal) goalModal.classList.remove('active');
+        this.renderStreakGoalWidgets();
+        if (typeof potdSound !== 'undefined') potdSound.playAchievement();
+      };
+    }
+  },
+
+  openStreakGoalModal() {
+    const goalModal = document.getElementById('streak-goal-modal');
+    if (goalModal) {
+      goalModal.classList.add('active');
+    }
+  },
+
+  renderStreakGoalWidgets() {
+    const state = potdStorage.getState();
+    const widgetHtml = potdStreak.renderProgressBar(state.currentStreak, state.streakGoal);
+
+    // Hero / Landing container
+    const heroGoalContainer = document.getElementById('hero-streak-goal-container');
+    if (heroGoalContainer) {
+      heroGoalContainer.innerHTML = `
+        ${widgetHtml}
+        <button type="button" onclick="AppRouter.openStreakGoalModal()" class="btn btn-outline btn-sm" style="margin-top: 0.5rem; width: 100%;">
+          🎯 EDIT STREAK GOAL
+        </button>
+      `;
+    }
+
+    // Stats page container
+    const statsGoalContainer = document.getElementById('stats-streak-goal-container');
+    if (statsGoalContainer) {
+      statsGoalContainer.innerHTML = `
+        ${widgetHtml}
+        <button type="button" onclick="AppRouter.openStreakGoalModal()" class="btn btn-outline btn-sm" style="margin-top: 0.5rem; width: 100%;">
+          🎯 EDIT STREAK GOAL
+        </button>
+      `;
+    }
+  },
+
+  checkStreakReminderBanner() {
+    const todayPuzzle = getTodayPuzzle();
+    const isSolved = potdStorage.isDayCompleted(todayPuzzle.day);
+    const banner = document.getElementById('streak-reminder-banner');
+
+    if (banner) {
+      if (!isSolved) {
+        banner.style.display = 'block';
+      } else {
+        banner.style.display = 'none';
+      }
+    }
+
+    // Check browser notification dispatch
+    const reminder = potdStorage.getState().reminderSettings;
+    if (!isSolved && reminder && reminder.enabled && window.Notification && Notification.permission === 'granted') {
+      const now = new Date();
+      const currentHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      if (currentHHMM === reminder.timing) {
+        new Notification('🔔 Your Ragasiyam streak is waiting!', {
+          body: 'You haven\'t solved today\'s puzzle yet. Play now to protect your streak!',
+          icon: '🧩'
+        });
+      }
+    }
   }
 };

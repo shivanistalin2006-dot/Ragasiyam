@@ -18,6 +18,34 @@ const ACHIEVEMENTS_LIST = [
     check: (state) => state.currentStreak >= 7
   },
   {
+    id: 'streak_14',
+    title: '⚡ Streak Overdrive',
+    description: 'Maintain a 14-day streak.',
+    icon: '⚡',
+    check: (state) => state.currentStreak >= 14
+  },
+  {
+    id: 'streak_30',
+    title: '💎 Midnight Cosmic Master',
+    description: 'Maintain a 30-day streak.',
+    icon: '💎',
+    check: (state) => state.currentStreak >= 30
+  },
+  {
+    id: 'streak_50',
+    title: '👑 Ragasiyam Master',
+    description: 'Maintain a 50-day streak.',
+    icon: '👑',
+    check: (state) => state.currentStreak >= 50
+  },
+  {
+    id: 'streak_100',
+    title: '🏆 Legendary Century',
+    description: 'Maintain a 100-day streak.',
+    icon: '🏆',
+    check: (state) => state.currentStreak >= 100
+  },
+  {
     id: 'speed_demon',
     title: '⚡ Speed Demon',
     description: 'Solve a puzzle in under 30 seconds.',
