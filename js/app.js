@@ -19,9 +19,11 @@ const AppRouter = {
     this.setupGlobalEvents();
     this.setupAuthModalEvents();
     this.setupStreakGoalModalEvents();
+    this.setupArcadeShopModalEvents();
     this.updateHeaderStats();
     this.renderStreakGoalWidgets();
     this.checkStreakReminderBanner();
+    this.checkDailyLoginReward();
     UIUtils.spawnFloatingPieces();
 
     const pathname = window.location.pathname;
@@ -275,6 +277,15 @@ const AppRouter = {
     const personalityEl = document.getElementById('player-personality-val');
     const xpFillEl = document.getElementById('xp-bar-fill');
     const xpTextEl = document.getElementById('xp-bar-text');
+    const avatarBox = document.getElementById('profile-avatar-box');
+
+    if (avatarBox) {
+      avatarBox.className = 'profile-avatar-box';
+      const equippedFrame = state.equippedFrame || 'none';
+      if (equippedFrame && equippedFrame !== 'none') {
+        avatarBox.classList.add(`frame-${equippedFrame}`);
+      }
+    }
 
     if (nameEl) nameEl.textContent = state.playerName;
     if (levelEl) levelEl.textContent = `Level ${state.level}`;
@@ -351,19 +362,37 @@ const AppRouter = {
     }
 
     // Render Live Leaderboard
-    this.renderLeaderboard();
+    this.renderLeaderboard(this.currentLeaderboardCategory || 'score');
   },
 
-  async renderLeaderboard() {
+  currentLeaderboardCategory: 'score',
+
+  switchLeaderboardTab(category) {
+    this.currentLeaderboardCategory = category;
+    const tabs = document.querySelectorAll('.leaderboard-container .auth-tab-btn');
+    tabs.forEach(tab => {
+      tab.classList.remove('active');
+      if (tab.getAttribute('data-category') === category) {
+        tab.classList.add('active');
+      }
+    });
+    this.renderLeaderboard(category);
+  },
+
+  async renderLeaderboard(category = this.currentLeaderboardCategory || 'score') {
     const leaderboardBody = document.getElementById('leaderboard-table-body');
     if (leaderboardBody && typeof potdDB !== 'undefined') {
-      const topPlayers = await potdDB.fetchLeaderboard(10);
+      const topPlayers = await potdDB.fetchLeaderboard(10, category);
       leaderboardBody.innerHTML = topPlayers.map((player, idx) => {
         let rankBadge = `${idx + 1}`;
         let rankClass = '';
         if (idx === 0) { rankBadge = '🥇'; rankClass = 'rank-gold'; }
         else if (idx === 1) { rankBadge = '🥈'; rankClass = 'rank-silver'; }
         else if (idx === 2) { rankBadge = '🥉'; rankClass = 'rank-bronze'; }
+
+        let catDisplay = `<strong>${(player.score || 0).toLocaleString()}</strong> pts`;
+        if (category === 'streak') catDisplay = `🔥 <strong>${player.streak || 0}</strong> days`;
+        else if (category === 'coins') catDisplay = `🪙 <strong>${(player.coins || 0).toLocaleString()}</strong>`;
 
         return `
           <tr>
@@ -374,7 +403,7 @@ const AppRouter = {
                 <span>${player.username}</span>
               </div>
             </td>
-            <td><strong>${(player.score || 0).toLocaleString()}</strong> pts</td>
+            <td>${catDisplay}</td>
             <td>🔥 ${player.streak || 0}</td>
             <td>Level ${player.level || 1}</td>
           </tr>
@@ -560,5 +589,171 @@ const AppRouter = {
         });
       }
     }
+  },
+
+  checkDailyLoginReward() {
+    if (typeof potdStorage !== 'undefined' && potdStorage.canClaimDailyReward()) {
+      const rewardModal = document.getElementById('daily-reward-modal');
+      if (rewardModal) {
+        setTimeout(() => {
+          this.renderDailyRewardGrid();
+          rewardModal.classList.add('active');
+        }, 800);
+      }
+    }
+  },
+
+  renderDailyRewardGrid() {
+    const grid = document.getElementById('daily-reward-grid');
+    if (!grid) return;
+
+    const state = potdStorage.getState();
+    const currentClaimStreak = (state.dailyReward ? state.dailyReward.claimStreak : 0) || 0;
+    const rewards = [
+      { day: 1, coins: 10, icon: '🪙' },
+      { day: 2, coins: 20, icon: '🪙' },
+      { day: 3, coins: 30, icon: '🪙' },
+      { day: 4, coins: 40, icon: '🪙' },
+      { day: 5, coins: 50, icon: '🪙' },
+      { day: 6, coins: 75, icon: '🪙' },
+      { day: 7, coins: 100, icon: '🛡️', bonus: '+ FREE Freeze' }
+    ];
+
+    grid.innerHTML = rewards.map(r => {
+      const isClaimed = (r.day <= currentClaimStreak && !potdStorage.canClaimDailyReward());
+      const isToday = (r.day === (currentClaimStreak % 7) + 1);
+
+      let cardClass = '';
+      if (isClaimed) cardClass = 'claimed';
+      else if (isToday) cardClass = 'active-today';
+
+      return `
+        <div class="reward-day-card ${cardClass}" style="background: ${isToday ? 'var(--golden-yellow)' : 'var(--cream-card)'}; border: 2.5px solid var(--dark-brown); border-radius: var(--radius-md); padding: 0.8rem; text-align: center; font-family: var(--font-heading);">
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--sunset-purple);">DAY ${r.day}</div>
+          <div style="font-size: 1.8rem; margin: 0.2rem 0;">${r.icon}</div>
+          <div style="font-weight: 700; font-size: 0.95rem; color: var(--dark-brown);">+${r.coins} 🪙</div>
+          ${r.bonus ? `<div style="font-size: 0.7rem; color: var(--coral); font-weight: 700;">${r.bonus}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+  },
+
+  claimDailyRewardNow() {
+    const result = potdStorage.claimDailyReward();
+    if (result) {
+      if (typeof potdSound !== 'undefined') potdSound.playAchievement();
+      if (typeof potdConfetti !== 'undefined') potdConfetti.burst(80);
+
+      const rewardModal = document.getElementById('daily-reward-modal');
+      if (rewardModal) rewardModal.classList.remove('active');
+
+      this.updateHeaderStats();
+      if (typeof gameApp !== 'undefined' && gameApp.showToast) {
+        gameApp.showToast(`🎁 Claimed Day ${result.day} Reward: +${result.coins} 🪙!`);
+      } else {
+        alert(`🎁 Claimed Day ${result.day} Reward: +${result.coins} 🪙!`);
+      }
+    }
+  },
+
+  setupArcadeShopModalEvents() {
+    const coinBadge = document.getElementById('header-coins-val');
+    const shopModal = document.getElementById('arcade-shop-modal');
+    const shopCloseBtn = document.getElementById('arcade-shop-modal-close');
+
+    if (coinBadge) {
+      coinBadge.onclick = () => this.openArcadeShopModal();
+      coinBadge.title = "Open Ragasiyam Arcade Shop 🪙";
+      coinBadge.style.cursor = "pointer";
+    }
+
+    if (shopCloseBtn && shopModal) {
+      shopCloseBtn.onclick = () => shopModal.classList.remove('active');
+    }
+  },
+
+  openArcadeShopModal() {
+    const shopModal = document.getElementById('arcade-shop-modal');
+    if (shopModal) {
+      this.renderArcadeShopGrid();
+      shopModal.classList.add('active');
+    }
+  },
+
+  renderArcadeShopGrid() {
+    const grid = document.getElementById('shop-items-grid');
+    if (!grid) return;
+
+    const state = potdStorage.getState();
+    const ownedThemes = state.inventory.themes || ['sunset', 'pink'];
+    const ownedFrames = state.ownedFrames || ['none'];
+    const equippedFrame = state.equippedFrame || 'none';
+
+    const shopItems = [
+      // Themes
+      { id: 'sunset', type: 'theme', name: 'Retro Sunset Theme', icon: '🌅', cost: 0, owned: true, active: state.activeTheme === 'sunset' },
+      { id: 'pink', type: 'theme', name: 'Pink Arcade Theme', icon: '🌸', cost: 0, owned: true, active: state.activeTheme === 'pink' },
+      { id: 'midnight', type: 'theme', name: 'Midnight Cosmic Theme', icon: '🌌', cost: 100, owned: ownedThemes.includes('midnight'), active: state.activeTheme === 'midnight' },
+
+      // Profile Frames
+      { id: 'flame', type: 'frame', name: '🔥 Flame Profile Frame', icon: '🔥', cost: 150, owned: ownedFrames.includes('flame'), active: equippedFrame === 'flame' },
+      { id: 'gold', type: 'frame', name: '👑 Royal Gold Frame', icon: '👑', cost: 250, owned: ownedFrames.includes('gold'), active: equippedFrame === 'gold' },
+      { id: 'electric', type: 'frame', name: '⚡ Electric Frame', icon: '⚡', cost: 200, owned: ownedFrames.includes('electric'), active: equippedFrame === 'electric' },
+      { id: 'diamond', type: 'frame', name: '💎 Diamond Frame', icon: '💎', cost: 400, owned: ownedFrames.includes('diamond'), active: equippedFrame === 'diamond' },
+
+      // Boosts & Freezes
+      { id: 'freeze', type: 'freeze', name: '🛡️ Streak Freeze × 1', icon: '🛡️', cost: 150, owned: false, active: false }
+    ];
+
+    grid.innerHTML = shopItems.map(item => {
+      let actionBtnHtml = '';
+      if (item.active) {
+        actionBtnHtml = `<button class="btn btn-secondary btn-sm" disabled style="opacity:0.8;">EQUIPPED ✅</button>`;
+      } else if (item.owned) {
+        actionBtnHtml = `<button onclick="AppRouter.equipShopItem('${item.id}', '${item.type}')" class="btn btn-outline btn-sm">EQUIP ⚡</button>`;
+      } else {
+        actionBtnHtml = `<button onclick="AppRouter.buyShopItem('${item.id}', '${item.type}', ${item.cost})" class="btn btn-primary btn-sm">BUY (${item.cost} 🪙)</button>`;
+      }
+
+      return `
+        <div class="shop-item-card" style="background: var(--cream-card); border: 3px solid var(--dark-brown); border-radius: var(--radius-md); padding: 1.2rem; text-align: center; font-family: var(--font-heading);">
+          <div style="font-size: 2.4rem; margin-bottom: 0.4rem;">${item.icon}</div>
+          <div style="font-weight: 700; font-size: 1.05rem; color: var(--dark-brown); margin-bottom: 0.4rem;">${item.name}</div>
+          <div style="margin-top: 0.8rem;">${actionBtnHtml}</div>
+        </div>
+      `;
+    }).join('');
+  },
+
+  buyShopItem(itemId, itemType, cost) {
+    if (potdStorage.buyShopItem(itemId, itemType, cost)) {
+      if (typeof potdSound !== 'undefined') potdSound.playAchievement();
+      if (typeof potdConfetti !== 'undefined') potdConfetti.burst(60);
+      this.updateHeaderStats();
+      this.renderArcadeShopGrid();
+      this.applySettings();
+      alert(`🎉 Successfully unlocked ${itemId.toUpperCase()}!`);
+    } else {
+      if (typeof potdSound !== 'undefined') potdSound.playWrong();
+      alert('❌ Not enough coins! Solve daily puzzles & maintain streaks to earn more coins 🪙.');
+    }
+  },
+
+  equipShopItem(itemId, itemType) {
+    if (itemType === 'theme') {
+      potdStorage.setActiveTheme(itemId);
+      this.applySettings();
+    } else if (itemType === 'frame') {
+      potdStorage.equipFrame(itemId);
+      const avatarBox = document.getElementById('profile-avatar-box');
+      if (avatarBox) {
+        avatarBox.className = 'profile-avatar-box';
+        if (itemId !== 'none') {
+          avatarBox.classList.add(`frame-${itemId}`);
+        }
+      }
+    }
+    if (typeof potdSound !== 'undefined') potdSound.playClick();
+    this.renderArcadeShopGrid();
   }
 };

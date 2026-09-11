@@ -148,12 +148,17 @@ class MultiDatabaseManager {
     }
   }
 
-  async fetchLeaderboard(limitCount = 10) {
+  async fetchLeaderboard(limitCount = 10, category = 'score') {
+    let orderField = 'total_score';
+    if (category === 'streak') orderField = 'current_streak';
+    else if (category === 'coins') orderField = 'coins';
+    else if (category === 'level') orderField = 'level';
+
     // 1. Attempt Firestore Live Leaderboard
     if (typeof potdFirebase !== 'undefined' && potdFirebase.isReady && potdFirebase.db) {
       try {
         const snapshot = await potdFirebase.db.collection('users')
-          .orderBy('total_score', 'desc')
+          .orderBy(orderField, 'desc')
           .limit(limitCount)
           .get();
 
@@ -166,7 +171,8 @@ class MultiDatabaseManager {
               avatar: data.avatar || '🧩',
               score: data.total_score || 0,
               streak: data.current_streak || 0,
-              level: data.level || 1
+              level: data.level || 1,
+              coins: data.coins || 100
             });
           });
           return list;
@@ -177,13 +183,20 @@ class MultiDatabaseManager {
     }
 
     // 2. Fallback Demo Leaderboard if Firestore is offline
-    return [
-      { username: 'Arjun', avatar: '⚡', score: 12840, streak: 14, level: 8 },
-      { username: 'Shivani', avatar: '🕵️', score: 11920, streak: 12, level: 7 },
-      { username: 'Priya', avatar: '🧠', score: 10450, streak: 10, level: 6 },
-      { username: 'Kavin', avatar: '👑', score: 9870, streak: 8, level: 5 },
-      { username: 'Rohan', avatar: '🧩', score: 8400, streak: 5, level: 4 }
+    const demo = [
+      { username: 'Arjun', avatar: '⚡', score: 12840, streak: 14, level: 8, coins: 1450 },
+      { username: 'Shivani', avatar: '🕵️', score: 11920, streak: 12, level: 7, coins: 1200 },
+      { username: 'Priya', avatar: '🧠', score: 10450, streak: 10, level: 6, coins: 980 },
+      { username: 'Kavin', avatar: '👑', score: 9870, streak: 8, level: 5, coins: 850 },
+      { username: 'Rohan', avatar: '🧩', score: 8400, streak: 5, level: 4, coins: 620 }
     ];
+
+    return demo.sort((a, b) => {
+      if (category === 'streak') return b.streak - a.streak;
+      if (category === 'coins') return b.coins - a.coins;
+      if (category === 'level') return b.level - a.level;
+      return b.score - a.score;
+    });
   }
 
   // --- SQLite Fallbacks ---

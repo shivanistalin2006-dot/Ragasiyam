@@ -16,13 +16,21 @@ const DEFAULT_STATE = {
   totalPlayTime: 0,
   currentStreak: 0,
   longestStreak: 0,
+  comboCount: 0,
   streakGoal: 7, // Default 7 days (or 'none' for casual)
   reminderSettings: {
     enabled: true,
     timing: '09:00'
   },
+  dailyReward: {
+    lastClaimDate: null,
+    claimStreak: 0
+  },
+  equippedFrame: 'none',
+  ownedFrames: ['none'],
   lastPlayedDate: null,
   completedDays: {},
+  weeklySolves: {},
   unlockedAchievements: [],
   inventory: {
     themes: ['sunset', 'pink'],
@@ -125,6 +133,108 @@ class StorageManager {
       return true;
     }
     return false;
+  }
+
+  // --- Daily Login Reward System (7-Day Cycle) ---
+  canClaimDailyReward() {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const lastClaim = this.state.dailyReward ? this.state.dailyReward.lastClaimDate : null;
+    return lastClaim !== todayStr;
+  }
+
+  claimDailyReward() {
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (!this.canClaimDailyReward()) return null;
+
+    let claimStreak = (this.state.dailyReward ? this.state.dailyReward.claimStreak : 0) || 0;
+    const lastClaim = this.state.dailyReward ? this.state.dailyReward.lastClaimDate : null;
+
+    if (lastClaim) {
+      const lastDate = new Date(lastClaim);
+      const todayDate = new Date(todayStr);
+      const diffDays = Math.round((todayDate - lastDate) / (1000 * 60 * 60 * 24));
+      if (diffDays === 1) {
+        claimStreak = (claimStreak % 7) + 1;
+      } else if (diffDays > 1) {
+        claimStreak = 1; // Cycle reset if missed
+      }
+    } else {
+      claimStreak = 1;
+    }
+
+    const rewardAmounts = [10, 20, 30, 40, 50, 75, 100];
+    const rewardCoins = rewardAmounts[claimStreak - 1] || 10;
+    this.addCoins(rewardCoins);
+
+    // Bonus streak freeze on Day 7
+    let bonusFreeze = false;
+    if (claimStreak === 7) {
+      this.addStreakFreeze(1);
+      bonusFreeze = true;
+    }
+
+    this.state.dailyReward = {
+      lastClaimDate: todayStr,
+      claimStreak: claimStreak
+    };
+    this.saveState();
+
+    return {
+      day: claimStreak,
+      coins: rewardCoins,
+      bonusFreeze: bonusFreeze
+    };
+  }
+
+  // --- Arcade Shop & Profile Frames ---
+  buyShopItem(itemId, itemType, cost) {
+    if (this.spendCoins(cost)) {
+      if (itemType === 'theme') {
+        if (!this.state.inventory.themes.includes(itemId)) {
+          this.state.inventory.themes.push(itemId);
+        }
+        this.setActiveTheme(itemId);
+      } else if (itemType === 'frame') {
+        if (!this.state.ownedFrames.includes(itemId)) {
+          this.state.ownedFrames.push(itemId);
+        }
+        this.equipFrame(itemId);
+      } else if (itemType === 'freeze') {
+        this.addStreakFreeze(1);
+      } else if (itemType === 'badge') {
+        this.unlockAchievement(itemId);
+      }
+      this.saveState();
+      return true;
+    }
+    return false;
+  }
+
+  equipFrame(frameId) {
+    this.state.equippedFrame = frameId;
+    this.saveState();
+  }
+
+  // --- Combo System ---
+  updateCombo(isNoHintSolve) {
+    if (isNoHintSolve) {
+      this.state.comboCount = (this.state.comboCount || 0) + 1;
+      const combo = this.state.comboCount;
+      let bonusCoins = 0;
+
+      if (combo === 3) bonusCoins = 50;
+      else if (combo === 5) bonusCoins = 100;
+      else if (combo >= 10 && combo % 5 === 0) bonusCoins = 250;
+
+      if (bonusCoins > 0) this.addCoins(bonusCoins);
+      this.saveState();
+
+      return { combo: combo, bonusCoins: bonusCoins };
+    } else {
+      this.state.comboCount = 0;
+      this.saveState();
+      return { combo: 0, bonusCoins: 0 };
+    }
   }
 
   addStreakFreeze(count = 1) {
