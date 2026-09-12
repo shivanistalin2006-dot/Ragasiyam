@@ -8,6 +8,11 @@
 class RetroSoundSynth {
   constructor() {
     this.ctx = null;
+    this.bgmPlaying = false;
+    this.bgmTimer = null;
+    this.bgmStep = 0;
+    this.bgmGainNode = null;
+    this.autoPlayAttached = false;
   }
 
   initContext() {
@@ -19,6 +24,129 @@ class RetroSoundSynth {
     }
     if (this.ctx && this.ctx.state === 'suspended') {
       this.ctx.resume();
+    }
+  }
+
+  initAutoPlayOnInteraction() {
+    if (this.autoPlayAttached) return;
+    this.autoPlayAttached = true;
+    const startAudioOnGesture = () => {
+      this.initContext();
+      if (potdStorage.getState().settings.soundEnabled && !this.bgmPlaying) {
+        this.startBGM();
+      }
+    };
+    window.addEventListener('click', startAudioOnGesture, { once: true });
+    window.addEventListener('touchstart', startAudioOnGesture, { once: true });
+    window.addEventListener('keydown', startAudioOnGesture, { once: true });
+  }
+
+  startBGM() {
+    if (!potdStorage.getState().settings.soundEnabled) return;
+    this.initContext();
+    if (!this.ctx) return;
+    if (this.bgmPlaying) return;
+
+    this.bgmPlaying = true;
+    this.bgmStep = 0;
+
+    // Master BGM gain node for low sound level (pleasant background sound)
+    if (!this.bgmGainNode) {
+      this.bgmGainNode = this.ctx.createGain();
+      this.bgmGainNode.connect(this.ctx.destination);
+    }
+    // Smooth fade in to ultra low sound level (0.025)
+    this.bgmGainNode.gain.setValueAtTime(0.0001, this.ctx.currentTime);
+    this.bgmGainNode.gain.exponentialRampToValueAtTime(0.025, this.ctx.currentTime + 1.2);
+
+    // Chords for pleasant green fresh nature tune (F maj9 -> C maj7/E -> D min9 -> Bb maj7)
+    const chordProgression = [
+      [174.61, 220.00, 261.63, 329.63, 392.00], // F maj9
+      [130.81, 196.00, 246.94, 261.63, 329.63], // C maj7/E
+      [146.83, 220.00, 261.63, 329.63, 440.00], // D min9
+      [116.54, 174.61, 220.00, 293.66, 349.23]  // Bb maj7
+    ];
+
+    const arpeggioPattern = [0, 2, 4, 3, 1, 4, 2, 3];
+
+    if (this.bgmTimer) clearInterval(this.bgmTimer);
+
+    // Step every 450ms (~67 BPM eighth-note rhythm, calm fresh pace)
+    this.bgmTimer = setInterval(() => {
+      if (!this.bgmPlaying || !this.ctx || !potdStorage.getState().settings.soundEnabled) return;
+
+      const chordIdx = Math.floor(this.bgmStep / 8) % chordProgression.length;
+      const currentChord = chordProgression[chordIdx];
+      const noteOffset = arpeggioPattern[this.bgmStep % 8];
+      const freq = currentChord[noteOffset % currentChord.length];
+
+      try {
+        // Soft Sine wave with 700Hz lowpass filter for green meadow tone
+        const osc = this.ctx.createOscillator();
+        const noteGain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(700, this.ctx.currentTime);
+
+        const now = this.ctx.currentTime;
+        noteGain.gain.setValueAtTime(0.001, now);
+        noteGain.gain.linearRampToValueAtTime(0.35, now + 0.1);
+        noteGain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+
+        osc.connect(filter);
+        filter.connect(noteGain);
+        noteGain.connect(this.bgmGainNode);
+
+        osc.start(now);
+        osc.stop(now + 0.9);
+
+        // Soft sub bass pad at start of each chord cycle (every 8 steps)
+        if (this.bgmStep % 8 === 0) {
+          const bassOsc = this.ctx.createOscillator();
+          const bassGain = this.ctx.createGain();
+          const bassFilter = this.ctx.createBiquadFilter();
+
+          bassOsc.type = 'triangle';
+          bassOsc.frequency.setValueAtTime(currentChord[0], now);
+
+          bassFilter.type = 'lowpass';
+          bassFilter.frequency.setValueAtTime(350, now);
+
+          bassGain.gain.setValueAtTime(0.001, now);
+          bassGain.gain.linearRampToValueAtTime(0.2, now + 0.3);
+          bassGain.gain.exponentialRampToValueAtTime(0.001, now + 3.2);
+
+          bassOsc.connect(bassFilter);
+          bassFilter.connect(bassGain);
+          bassGain.connect(this.bgmGainNode);
+
+          bassOsc.start(now);
+          bassOsc.stop(now + 3.3);
+        }
+      } catch (e) {
+        // audio context safeguard
+      }
+
+      this.bgmStep++;
+    }, 450);
+  }
+
+  stopBGM() {
+    this.bgmPlaying = false;
+    if (this.bgmTimer) {
+      clearInterval(this.bgmTimer);
+      this.bgmTimer = null;
+    }
+    if (this.bgmGainNode && this.ctx) {
+      try {
+        const now = this.ctx.currentTime;
+        this.bgmGainNode.gain.setValueAtTime(this.bgmGainNode.gain.value, now);
+        this.bgmGainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+      } catch (e) {}
     }
   }
 

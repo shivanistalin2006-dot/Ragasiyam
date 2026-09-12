@@ -17,6 +17,9 @@ const AppRouter = {
 
     this.applySettings();
     this.setupGlobalEvents();
+    if (typeof potdSound !== 'undefined') {
+      potdSound.initAutoPlayOnInteraction();
+    }
     this.setupAuthModalEvents();
     this.setupStreakGoalModalEvents();
     this.setupArcadeShopModalEvents();
@@ -59,7 +62,16 @@ const AppRouter = {
       soundBtn.onclick = () => {
         const isEnabled = potdStorage.toggleSound();
         soundBtn.textContent = isEnabled ? '🔊' : '🔇';
-        if (isEnabled) potdSound.playClick();
+        if (isEnabled) {
+          if (typeof potdSound !== 'undefined') {
+            potdSound.startBGM();
+            potdSound.playClick();
+          }
+        } else {
+          if (typeof potdSound !== 'undefined') {
+            potdSound.stopBGM();
+          }
+        }
       };
       soundBtn.textContent = potdStorage.getState().settings.soundEnabled ? '🔊' : '🔇';
     }
